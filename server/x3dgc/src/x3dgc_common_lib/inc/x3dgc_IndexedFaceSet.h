@@ -47,26 +47,26 @@ namespace x3dgc
         
         unsigned long                                           GetNCoordIndex()       const { return m_nCoordIndex     ;}
         // only coordIndex is supported
-        unsigned long                                           GetNNormalIndex()      const { return 0;}
-        unsigned long                                           GetNColorIndex()       const { return 0;}
-        unsigned long                                           GetNTexCoordIndex()    const { return 0;}
-        unsigned long                                           GetNFloatAttributeIndex(int a) const { return 0;}
-        unsigned long                                           GetNIntAttributeIndex  (int a) const { return 0;}
+//        unsigned long                                           GetNNormalIndex()      const { return 0;}
+//        unsigned long                                           GetNColorIndex()       const { return 0;}
+//        unsigned long                                           GetNTexCoordIndex()    const { return 0;}
+//        unsigned long                                           GetNFloatAttributeIndex(unsigned long a) const { return 0;}
+//        unsigned long                                           GetNIntAttributeIndex  (unsigned long a) const { return 0;}
         // per triangle attributes not supported
-        bool                                                    GetNormalPerVertex()   const { return true;} 
-        bool                                                    GetColorPerVertex()    const { return true;}
-        bool                                                    GetFloatAttributePerVertex(int a) const { return true;}
-        bool                                                    GetIntAttributePerVertex  (int a) const { return true;}        
+//        bool                                                    GetNormalPerVertex()   const { return true;} 
+//        bool                                                    GetColorPerVertex()    const { return true;}
+//        bool                                                    GetFloatAttributePerVertex(unsigned long a) const { return true;}
+//        bool                                                    GetIntAttributePerVertex  (unsigned long a) const { return true;}        
         unsigned long                                           GetNCoord()           const { return m_nCoord         ;}
         unsigned long                                           GetNNormal()          const { return m_nNormal        ;}
         unsigned long                                           GetNColor()           const { return m_nColor         ;}
         unsigned long                                           GetNTexCoord()        const { return m_nTexCoord      ;}
-		unsigned long                                           GetNFloatAttribute(int a)  const 
+		unsigned long                                           GetNFloatAttribute(unsigned long a)  const 
 																{ 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     return m_nFloatAttribute[a];
 																}
-		unsigned long                                           GetNIntAttribute(int a)  const 
+		unsigned long                                           GetNIntAttribute(unsigned long a)  const 
 																{ 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                                                     return m_nIntAttribute[a];
@@ -90,34 +90,34 @@ namespace x3dgc
         Real                                                    GetColorMax   (int j)  const { return m_colorMax[j]       ;}
         Real                                                    GetTexCoordMin(int j)  const { return m_texCoordMin[j]    ;}
         Real                                                    GetTexCoordMax(int j)  const { return m_texCoordMax[j]    ;}
-        const unsigned long                                     GetFloatAttributeDim(int a) const
+        const unsigned long                                     GetFloatAttributeDim(unsigned long a) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     return m_dimFloatAttribute[a];
                                                                 }
-        unsigned long                                           GetIntAttributeDim(int a) const
+        unsigned long                                           GetIntAttributeDim(unsigned long a) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                                                     return m_dimIntAttribute[a];
                                                                 }
-        const Real * const                                      GetFloatAttributeMin(int a) const
+        const Real * const                                      GetFloatAttributeMin(unsigned long a) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     return &(m_minFloatAttribute[a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES]);
                                                                 }
-        const Real * const                                      GetFloatAttributeMax(int a) const
+        const Real * const                                      GetFloatAttributeMax(unsigned long a) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     return &(m_maxFloatAttribute[a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES]);
                                                                 }
 
-        Real                                                    GetFloatAttributeMin(int a, int dim) const
+        Real                                                    GetFloatAttributeMin(unsigned long a, unsigned long dim) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     assert(dim < X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
                                                                     return m_minFloatAttribute[a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES + dim];
                                                                 }
-        Real                                                    GetFloatAttributeMax(int a, int dim) const
+        Real                                                    GetFloatAttributeMax(unsigned long a, unsigned long dim) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     assert(dim < X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
@@ -134,12 +134,12 @@ namespace x3dgc
         Real * const                                            GetNormal()               const { return m_normal           ;}
         Real * const                                            GetColor()                const { return m_color            ;}
         Real * const                                            GetTexCoord()             const { return m_texCoord         ;}
-        Real * const                                            GetFloatAttribute(int a)  const 
+        Real * const                                            GetFloatAttribute(unsigned long a)  const 
 																{
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
 																	return m_floatAttribute[a];
 																}
-        long * const                                            GetIntAttribute(int a)   const 
+        long * const                                            GetIntAttribute(unsigned long a)   const 
 																{
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
 																	return m_intAttribute[a]  ;
@@ -184,34 +184,34 @@ namespace x3dgc
         void                                                    SetColorMax        (int j, Real max) { m_colorMax[j]    = max;}
         void                                                    SetTexCoordMin     (int j, Real min) { m_texCoordMin[j] = min;}
         void                                                    SetTexCoordMax     (int j, Real max) { m_texCoordMax[j] = max;}
-		void													SetNFloatAttribute(int a, unsigned long nFloatAttribute) 
+		void													SetNFloatAttribute(unsigned long a, unsigned long nFloatAttribute) 
 																{ 
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
 																	m_nFloatAttribute[a] = nFloatAttribute;
 																}
-		void			                                        SetNIntAttribute(int a, unsigned long nIntAttribute) 
+		void			                                        SetNIntAttribute(unsigned long a, unsigned long nIntAttribute) 
 																{ 
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
 																	m_nIntAttribute[a] = nIntAttribute;
 																}
 
-        void			                                        SetFloatAttributeDim(int a, unsigned long d)
+        void			                                        SetFloatAttributeDim(unsigned long a, unsigned long d)
 																{ 
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
 																	m_dimFloatAttribute[a] = d;
 																}
-        void			                                        SetIntAttributeDim(int a, unsigned long d)
+        void			                                        SetIntAttributeDim(unsigned long a, unsigned long d)
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                                                     m_dimIntAttribute[a] = d;
                                                                 }
-		void													SetFloatAttributeMin(int a, int dim, Real min) 
+		void													SetFloatAttributeMin(unsigned long a, unsigned long dim, Real min) 
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     assert(dim < X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
                                                                     m_minFloatAttribute[a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES + dim] = min;
                                                                 }
-        void													SetFloatAttributeMax(int a, int dim, Real max) 
+        void													SetFloatAttributeMax(unsigned long a, unsigned long dim, Real max) 
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                     assert(dim < X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
@@ -222,12 +222,12 @@ namespace x3dgc
         void                                                    SetNormal         (Real * const normal    ) { m_normal     = normal   ;}
         void                                                    SetColor          (Real * const color     ) { m_color      = color    ;}
         void                                                    SetTexCoord       (Real * const texCoord  ) { m_texCoord   = texCoord ;}
-        void			                                        SetFloatAttribute (int a, Real * const floatAttribute) 
+        void			                                        SetFloatAttribute (unsigned long a, Real * const floatAttribute) 
 																{
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
 																	m_floatAttribute[a] = floatAttribute;
 																}
-        void			                                        SetIntAttribute   (int a, long * const intAttribute)
+        void			                                        SetIntAttribute   (unsigned long a, long * const intAttribute)
 																{
 																	assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
 																	m_intAttribute[a] = intAttribute ;
@@ -281,3 +281,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_INDEXED_FACE_SET_H
+

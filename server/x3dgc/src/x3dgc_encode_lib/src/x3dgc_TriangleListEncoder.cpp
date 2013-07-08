@@ -779,3 +779,4 @@ namespace x3dgc
 		return X3DGC_OK;
 	}
 }
+

@@ -48,10 +48,10 @@ namespace x3dgc
         ifs.SetSolid           ((mask & 2) == 1);
         ifs.SetConvex          ((mask & 4) == 1);
         ifs.SetIsTriangularMesh((mask & 8) == 1);
-        bool markerBit0 = (mask & 16 ) == 1;
-        bool markerBit1 = (mask & 32 ) == 1;
-        bool markerBit2 = (mask & 64 ) == 1;
-        bool markerBit3 = (mask & 128) == 1;
+        //bool markerBit0 = (mask & 16 ) == 1;
+        //bool markerBit1 = (mask & 32 ) == 1;
+        //bool markerBit2 = (mask & 64 ) == 1;
+        //bool markerBit3 = (mask & 128) == 1;
        
         ifs.SetNCoord         (bstream.ReadUInt32(m_iterator));
         ifs.SetNNormal        (bstream.ReadUInt32(m_iterator));
@@ -185,9 +185,9 @@ namespace x3dgc
                                                  unsigned long numIntArraySize,
                                                  unsigned long dimIntArraySize,
                                                  const BinaryStream & bstream)
-    {
-		unsigned long streamSize = bstream.ReadUInt32(m_iterator)-4;		
+    {		
 		const long nvert = (long) numIntArraySize;
+		bstream.ReadUInt32(m_iterator); // bistream size
 		for (long v=0; v < nvert; ++v) 
 		{
 			for (unsigned long i = 0; i < dimIntArraySize; i++) 
@@ -213,12 +213,10 @@ namespace x3dgc
 		long vpred[X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
 		long tpred[X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
 		long nv, nt;
-		long v;
 		long predResidual;		
-		const long nvert = (long) numfloatArraySize;
-
-		unsigned long streamSize = bstream.ReadUInt32(m_iterator)-4;        
+		const long nvert = (long) numfloatArraySize;		
 		const unsigned long size = numfloatArraySize * dimfloatArraySize;
+		bstream.ReadUInt32(m_iterator);        // bitsream size
         if (m_quantFloatArraySize < size)
         {
             delete [] m_quantFloatArray;
@@ -408,3 +406,5 @@ namespace x3dgc
 		return X3DGC_OK;
 	}
 }
+
+

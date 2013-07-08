@@ -50,10 +50,10 @@ namespace x3dgc
                                                                     unsigned char * ptr = (unsigned char *) (&value);                                                                    
                                                                     if (m_endianness == X3DGC_BIG_ENDIAN)
                                                                     {
-                                                                        m_stream[position++] = (*(ptr+3));
-                                                                        m_stream[position++] = (*(ptr+2));
-                                                                        m_stream[position++] = (*(ptr+1));
-                                                                        m_stream[position  ] = (*(ptr+0));
+                                                                        m_stream[position++] = ptr[3];
+                                                                        m_stream[position++] = ptr[2];
+                                                                        m_stream[position++] = ptr[1];
+                                                                        m_stream[position  ] = ptr[0];
                                                                     }
                                                                     else
                                                                     {
@@ -69,17 +69,17 @@ namespace x3dgc
                                                                     unsigned char * ptr = (unsigned char *) (&value);
                                                                     if (m_endianness == X3DGC_BIG_ENDIAN)
                                                                     {
-                                                                        m_stream.PushBack(*(ptr+3));
-                                                                        m_stream.PushBack(*(ptr+2));
-                                                                        m_stream.PushBack(*(ptr+1));
-                                                                        m_stream.PushBack(*(ptr+0));
+                                                                        m_stream.PushBack(ptr[3]);
+                                                                        m_stream.PushBack(ptr[2]);
+                                                                        m_stream.PushBack(ptr[1]);
+                                                                        m_stream.PushBack(ptr[0]);
                                                                     }
                                                                     else
                                                                     {
-                                                                        m_stream.PushBack(*(ptr+0));
-                                                                        m_stream.PushBack(*(ptr+1));
-                                                                        m_stream.PushBack(*(ptr+2));
-                                                                        m_stream.PushBack(*(ptr+3));
+                                                                        m_stream.PushBack(ptr[0]);
+                                                                        m_stream.PushBack(ptr[1]);
+                                                                        m_stream.PushBack(ptr[2]);
+                                                                        m_stream.PushBack(ptr[3]);
                                                                     }
                                                                 }
         void                                                    WriteUInt32(unsigned long position, unsigned long value) 
@@ -88,17 +88,17 @@ namespace x3dgc
                                                                     unsigned char * ptr = (unsigned char *) (&value);                                                                    
                                                                     if (m_endianness == X3DGC_BIG_ENDIAN)
                                                                     {
-                                                                        m_stream[position++] = (*(ptr+3));
-                                                                        m_stream[position++] = (*(ptr+2));
-                                                                        m_stream[position++] = (*(ptr+1));
-                                                                        m_stream[position  ] = (*(ptr+0));
+                                                                        m_stream[position++] = ptr[3];
+                                                                        m_stream[position++] = ptr[2];
+                                                                        m_stream[position++] = ptr[1];
+                                                                        m_stream[position  ] = ptr[0];
                                                                     }
                                                                     else
                                                                     {
-                                                                        m_stream[position++] = (*(ptr+0));
-                                                                        m_stream[position++] = (*(ptr+1));
-                                                                        m_stream[position++] = (*(ptr+2));
-                                                                        m_stream[position  ] = (*(ptr+3));
+                                                                        m_stream[position++] = ptr[0];
+                                                                        m_stream[position++] = ptr[1];
+                                                                        m_stream[position++] = ptr[2];
+                                                                        m_stream[position  ] = ptr[3];
                                                                     }
                                                                 }
 
@@ -107,17 +107,17 @@ namespace x3dgc
                                                                     unsigned char * ptr = (unsigned char *) (&value);
                                                                     if (m_endianness == X3DGC_BIG_ENDIAN)
                                                                     {
-                                                                        m_stream.PushBack(*(ptr+3));
-                                                                        m_stream.PushBack(*(ptr+2));
-                                                                        m_stream.PushBack(*(ptr+1));
-                                                                        m_stream.PushBack(*(ptr+0));
+                                                                        m_stream.PushBack(ptr[3]);
+                                                                        m_stream.PushBack(ptr[2]);
+                                                                        m_stream.PushBack(ptr[1]);
+                                                                        m_stream.PushBack(ptr[0]);
                                                                     }
                                                                     else
                                                                     {
-                                                                        m_stream.PushBack(*(ptr+0));
-                                                                        m_stream.PushBack(*(ptr+1));
-                                                                        m_stream.PushBack(*(ptr+2));
-                                                                        m_stream.PushBack(*(ptr+3));
+                                                                        m_stream.PushBack(ptr[0]);
+                                                                        m_stream.PushBack(ptr[1]);
+                                                                        m_stream.PushBack(ptr[2]);
+                                                                        m_stream.PushBack(ptr[3]);
                                                                     }
                                                                 }
         void                                                    WriteUChar8(unsigned int position, unsigned char value) 
@@ -132,43 +132,26 @@ namespace x3dgc
 
         float                                                   ReadFloat32(unsigned long & position) const
                                                                 {
-                                                                    assert(position < m_stream.GetSize() - 4);
-                                                                    float value;
-                                                                    unsigned char * ptr = (unsigned char *) (&value);                                                                    
-                                                                    if (m_endianness == X3DGC_BIG_ENDIAN)
-                                                                    {
-                                                                        (*(ptr+3)) = m_stream[position++];
-                                                                        (*(ptr+2)) = m_stream[position++];
-                                                                        (*(ptr+1)) = m_stream[position++];
-                                                                        (*(ptr+0)) = m_stream[position++];
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        (*(ptr+0)) = m_stream[position++];
-                                                                        (*(ptr+1)) = m_stream[position++];
-                                                                        (*(ptr+2)) = m_stream[position++];
-                                                                        (*(ptr+3)) = m_stream[position++];
-                                                                    }
-                                                                    return value;
+																	unsigned long value = ReadUInt32(position);
+																	float fvalue = *((float *)(&value));
+                                                                    return fvalue;
                                                                 }
         unsigned long                                           ReadUInt32(unsigned long & position)  const
                                                                 {
-                                                                    assert(position < m_stream.GetSize() - 4);
-                                                                    unsigned long value;
-                                                                    unsigned char * ptr = (unsigned char *) (&value);                                                                    
+                                                                    assert(position < m_stream.GetSize() - 4);                                                                 unsigned long value = 0;
                                                                     if (m_endianness == X3DGC_BIG_ENDIAN)
                                                                     {
-                                                                        (*(ptr+3)) = m_stream[position++];
-                                                                        (*(ptr+2)) = m_stream[position++];
-                                                                        (*(ptr+1)) = m_stream[position++];
-                                                                        (*(ptr+0)) = m_stream[position++];
+																		value += (m_stream[position++]<<24);
+                                                                        value += (m_stream[position++]<<16);
+                                                                        value += (m_stream[position++]<<8);
+                                                                        value += (m_stream[position++]);
                                                                     }
                                                                     else
                                                                     {
-                                                                        (*(ptr+0)) = m_stream[position++];
-                                                                        (*(ptr+1)) = m_stream[position++];
-                                                                        (*(ptr+2)) = m_stream[position++];
-                                                                        (*(ptr+3)) = m_stream[position++];
+                                                                        value += (m_stream[position++]);
+                                                                        value += (m_stream[position++]<<8);
+                                                                        value += (m_stream[position++]<<16);
+                                                                        value += (m_stream[position++]<<24);
                                                                     }
                                                                     return value;
                                                                 }
@@ -221,3 +204,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_BINARY_STREAM_H
+

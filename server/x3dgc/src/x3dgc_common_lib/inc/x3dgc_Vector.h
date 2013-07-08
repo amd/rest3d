@@ -183,3 +183,4 @@ namespace x3dgc
 }
 #include "x3dgc_Vector.inl"	// template implementation
 #endif // X3DGC_VECTOR_H
+

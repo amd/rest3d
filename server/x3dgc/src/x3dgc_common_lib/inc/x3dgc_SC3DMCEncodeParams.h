@@ -46,11 +46,11 @@ namespace x3dgc
                                                                     m_texCoordPredMode  = X3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;
                                                                     m_normalPredMode    = X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION;  
                                                                     m_colorPredMode     = X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION;
-																	for(int a = 0; a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES; ++a)
+																	for(unsigned long a = 0; a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES; ++a)
 																	{
 																		m_floatAttributePredMode[a] = X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION;
 																	}
-																	for(int a = 0; a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES; ++a)
+																	for(unsigned long a = 0; a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES; ++a)
 																	{
 																		m_intAttributePredMode[a] = X3DGC_SC3DMC_NO_PREDICTION;
 																	}
@@ -69,7 +69,7 @@ namespace x3dgc
         unsigned long                                           GetNormalQuantBits()   const { return m_normalQuantBits; }
         unsigned long                                           GetColorQuantBits()    const { return m_colorQuantBits; }
         unsigned long                                           GetTexCoordQuantBits() const { return m_texCoordQuantBits; }
-        unsigned long                                           GetFloatAttributeQuantBits(int a) const
+        unsigned long                                           GetFloatAttributeQuantBits(unsigned long a) const
                                                                 { 
                                                                    assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                    return m_floatAttributeQuantBits[a];
@@ -79,13 +79,13 @@ namespace x3dgc
         X3DGCSC3DMCPredictionMode                               GetNormalPredMode()   const { return m_normalPredMode; }
         X3DGCSC3DMCPredictionMode                               GetColorPredMode()    const { return m_colorPredMode; }
         X3DGCSC3DMCPredictionMode                               GetTexCoordPredMode() const { return m_texCoordPredMode; }
-        X3DGCSC3DMCPredictionMode                               GetFloatAttributePredMode(int a) const
+        X3DGCSC3DMCPredictionMode                               GetFloatAttributePredMode(unsigned long a) const
                                                                 { 
                                                                    assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                    return m_floatAttributePredMode[a];
                                                                 }
 
-        X3DGCSC3DMCPredictionMode                               GetIntAttributePredMode(int a) const
+        X3DGCSC3DMCPredictionMode                               GetIntAttributePredMode(unsigned long a) const
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                                                     return m_intAttributePredMode[a];
@@ -112,7 +112,7 @@ namespace x3dgc
         void                                                    SetNormalQuantBits  (unsigned int normalQuantBits  ) { m_normalQuantBits   = normalQuantBits  ; }
         void                                                    SetColorQuantBits   (unsigned int colorQuantBits   ) { m_colorQuantBits    = colorQuantBits   ; }
         void                                                    SetTexCoordQuantBits(unsigned int texCoordQuantBits) { m_texCoordQuantBits = texCoordQuantBits; }
-		void													SetFloatAttributeQuantBits(int a, unsigned long q) 
+		void													SetFloatAttributeQuantBits(unsigned long a, unsigned long q) 
                                                                 { 
                                                                    assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                    m_floatAttributeQuantBits[a] = q;
@@ -122,12 +122,12 @@ namespace x3dgc
         void                                                    SetNormalPredMode  (X3DGCSC3DMCPredictionMode normalPredMode  ) { m_normalPredMode   = normalPredMode  ; }
         void                                                    SetColorPredMode   (X3DGCSC3DMCPredictionMode colorPredMode   ) { m_colorPredMode    = colorPredMode   ; }
         void                                                    SetTexCoordPredMode(X3DGCSC3DMCPredictionMode texCoordPredMode) { m_texCoordPredMode = texCoordPredMode; }
-		void													GetFloatAttributePredMode(int a, X3DGCSC3DMCPredictionMode p) 
+		void													GetFloatAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
                                                                 { 
                                                                    assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                                                    m_floatAttributePredMode[a] = p;
                                                                 }                       
-		void													GetIntAttributePredMode(int a, X3DGCSC3DMCPredictionMode p) 
+		void													GetIntAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
                                                                 { 
                                                                     assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                                                     m_intAttributePredMode[a] = p;
@@ -156,3 +156,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_SC3DMC_ENCODE_PARAMS_H
+

@@ -97,3 +97,4 @@ namespace x3dgc
 
 }
 #endif // X3DGC_TRIANGLE_LIST_ENCODER_H
+

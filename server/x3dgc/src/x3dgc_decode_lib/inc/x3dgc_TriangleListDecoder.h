@@ -109,3 +109,4 @@ namespace x3dgc
 	};
 }
 #endif // X3DGC_TRIANGLE_LIST_DECODER_H
+

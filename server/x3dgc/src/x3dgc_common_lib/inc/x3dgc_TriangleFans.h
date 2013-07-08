@@ -360,3 +360,4 @@ namespace x3dgc
 	};
 }
 #endif // X3DGC_TRIANGLE_FANS_H
+

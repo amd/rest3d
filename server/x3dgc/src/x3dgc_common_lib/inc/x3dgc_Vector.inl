@@ -323,3 +323,4 @@ namespace x3dgc
 
 }
 #endif //X3DGC_VECTOR_INL
+

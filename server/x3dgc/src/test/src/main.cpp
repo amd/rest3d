@@ -288,7 +288,7 @@ enum Mode
 	DECODE  = 2
 };
 
-long main(long argc, char * argv[])
+int main(int argc, char * argv[])
 {
 	Mode mode = UNKNOWN;
 	std::string inputFileName;
@@ -403,7 +403,7 @@ bool LoadOBJ(const std::string & fileName,
     
 	if (fid) 
     {        
-        char buffer[1024];
+        char buffer[BufferSize];
         Real  x[3];
 		long ip[3] = {-1, -1, -1};
         long in[3] = {-1, -1, -1};
@@ -420,7 +420,7 @@ bool LoadOBJ(const std::string & fileName,
 
         while (!feof(fid)) 
         {
-            fgets(buffer, 1024, fid);
+            fgets(buffer, BufferSize, fid);
             if (buffer[0] == 'v')
             {
                 if (buffer[1] == ' ')
@@ -562,8 +562,8 @@ bool SaveOBJ(const char * fileName,
         fprintf(fid,"####\n");
         fprintf(fid,"# Object %s\n", fileName);
         fprintf(fid,"#\n");
-        fprintf(fid,"# Vertices: %i\n", np);
-        fprintf(fid,"# Faces: %i\n", nf);
+        fprintf(fid,"# Vertices: %lu\n", np);
+        fprintf(fid,"# Faces: %lu\n", nf);
         fprintf(fid,"#\n");
         fprintf(fid,"####\n");
         for(size_t i = 0; i < np; ++i)
@@ -582,7 +582,7 @@ bool SaveOBJ(const char * fileName,
         {
             for(size_t i = 0; i < nf; ++i)
             {
-                fprintf(fid,"f %i/%i/%i %i/%i/%i %i/%i/%i\n", triangles[i].X()+1, triangles[i].X()+1, triangles[i].X()+1,
+                fprintf(fid,"f %ld/%ld/%ld %ld/%ld/%ld %ld/%ld/%ld\n", triangles[i].X()+1, triangles[i].X()+1, triangles[i].X()+1,
 													          triangles[i].Y()+1, triangles[i].Y()+1, triangles[i].Y()+1, 
 														      triangles[i].Z()+1, triangles[i].Z()+1, triangles[i].Z()+1);
             }
@@ -591,7 +591,7 @@ bool SaveOBJ(const char * fileName,
         {
             for(size_t i = 0; i < nf; ++i)
             {
-                fprintf(fid,"f %i//%i %i//%i %i//%i\n", triangles[i].X()+1, triangles[i].X()+1,
+                fprintf(fid,"f %ld//%ld %ld//%ld %ld//%ld\n", triangles[i].X()+1, triangles[i].X()+1,
 													    triangles[i].Y()+1, triangles[i].Y()+1, 
 														triangles[i].Z()+1, triangles[i].Z()+1);
             }
@@ -600,7 +600,7 @@ bool SaveOBJ(const char * fileName,
         {
             for(size_t i = 0; i < nf; ++i)
             {
-                fprintf(fid,"f %i/%i %i/%i %i/%i\n", triangles[i].X()+1, triangles[i].X()+1,
+                fprintf(fid,"f %ld/%ld %ld/%ld %ld/%ld\n", triangles[i].X()+1, triangles[i].X()+1,
 												     triangles[i].Y()+1, triangles[i].Y()+1, 
 													 triangles[i].Z()+1, triangles[i].Z()+1);
             }
@@ -609,7 +609,7 @@ bool SaveOBJ(const char * fileName,
         {
             for(size_t i = 0; i < nf; ++i)
             {
-                fprintf(fid,"f %i %i %i\n", triangles[i].X()+1, triangles[i].Y()+1, triangles[i].Z()+1);
+                fprintf(fid,"f %ld %ld %ld\n", triangles[i].X()+1, triangles[i].Y()+1, triangles[i].Z()+1);
             }
         }
 		fclose(fid);
