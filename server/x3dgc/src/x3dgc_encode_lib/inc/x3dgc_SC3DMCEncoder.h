@@ -25,71 +25,69 @@ THE SOFTWARE.
 #ifndef X3DGC_SC3DMC_ENCODER_H
 #define X3DGC_SC3DMC_ENCODER_H
 
-#include <x3dgc_Common.h>
-#include <x3dgc_BinaryStream.h>
-#include <x3dgc_IndexedFaceSet.h>
-#include <x3dgc_SC3DMCEncodeParams.h>
-#include <x3dgc_TriangleListEncoder.h>
+#include "x3dgc_Common.h"
+#include "x3dgc_BinaryStream.h"
+#include "x3dgc_IndexedFaceSet.h"
+#include "x3dgc_SC3DMCEncodeParams.h"
+#include "x3dgc_TriangleListEncoder.h"
 
 namespace x3dgc
-{	
-	//! 
+{    
+    //! 
     class SC3DMCEncoder
-	{
-    public:	
-		//! Constructor.
-                                                                SC3DMCEncoder(void)
-                                                                {
-                                                                    m_quantFloatArray     = 0;
-                                                                    m_quantFloatArraySize = 0;
-																	m_binarization		  = X3DGC_SC3DMC_UNKOWN;
-                                                                };
-		//! Destructor.
-																~SC3DMCEncoder(void)
-                                                                {
-                                                                    delete [] m_quantFloatArray;
-                                                                }
-		//! 
-		X3DGCErrorCode											Encode(const SC3DMCEncodeParams & params, 
-                                                                       const IndexedFaceSet & ifs, 
-                                                                       BinaryStream & bstream);	
+    {
+    public:    
+        //! Constructor.
+                                    SC3DMCEncoder(void)
+                                    {
+                                        m_quantFloatArray     = 0;
+                                        m_quantFloatArraySize = 0;
+                                        m_binarization          = X3DGC_SC3DMC_UNKOWN;
+                                    };
+        //! Destructor.
+                                    ~SC3DMCEncoder(void)
+                                    {
+                                        delete [] m_quantFloatArray;
+                                    }
+        //! 
+        X3DGCErrorCode              Encode(const SC3DMCEncodeParams & params, 
+                                           const IndexedFaceSet & ifs, 
+                                           BinaryStream & bstream);    
 
-		private:
-        X3DGCErrorCode											EncodeHeader(const SC3DMCEncodeParams & params, 
-                                                                             const IndexedFaceSet & ifs, 
-                                                                             BinaryStream & bstream);
-        X3DGCErrorCode											EncodePayload(const SC3DMCEncodeParams & params, 
-                                                                               const IndexedFaceSet & ifs, 
-                                                                               BinaryStream & bstream);
-        X3DGCErrorCode                                          EncodeFloatArray(const Real * const floatArray, 
-																				 unsigned long numfloatArraySize,
-																				 unsigned long dimfloatArraySize,
-																				 const Real * const minfloatArray,
-																				 const Real * const maxfloatArray,
-																				 unsigned long nQBits,
-																				 const IndexedFaceSet & ifs,
-																				 X3DGCSC3DMCPredictionMode predMode,
-																				 BinaryStream & bstream);
-        X3DGCErrorCode                                          QuantizeFloatArray(const Real * const floatArray, 
-                                                                                   unsigned long numfloatArraySize,
-                                                                                   unsigned long dimfloatArraySize,
-                                                                                   const Real * const minfloatArray,
-                                                                                   const Real * const maxfloatArray,
-                                                                                   unsigned long nQBits);
-		X3DGCErrorCode											EncodeIntArray(const long * const intArray, 
-																			   unsigned long numIntArraySize,
-																			   unsigned long dimIntArraySize,
-																			   BinaryStream & bstream);
-		X3DGCErrorCode											EncodePredicionResidual(long predResidual, 
-																					    BinaryStream & bstream, 
-																						bool predicted);        
-        TriangleListEncoder                                     m_triangleListEncoder;
-        long *                                                  m_quantFloatArray;
-	    unsigned long                                           m_quantFloatArraySize;
-		X3DGCSC3DMCBinarization                                 m_binarization;
-	};
-
-
+        private:
+        X3DGCErrorCode              EncodeHeader(const SC3DMCEncodeParams & params, 
+                                                 const IndexedFaceSet & ifs, 
+                                                 BinaryStream & bstream);
+        X3DGCErrorCode              EncodePayload(const SC3DMCEncodeParams & params, 
+                                                  const IndexedFaceSet & ifs, 
+                                                   BinaryStream & bstream);
+        X3DGCErrorCode              EncodeFloatArray(const Real * const floatArray, 
+                                                     unsigned long numfloatArraySize,
+                                                     unsigned long dimfloatArraySize,
+                                                     const Real * const minfloatArray,
+                                                     const Real * const maxfloatArray,
+                                                     unsigned long nQBits,
+                                                     const IndexedFaceSet & ifs,
+                                                     X3DGCSC3DMCPredictionMode predMode,
+                                                     BinaryStream & bstream);
+        X3DGCErrorCode              QuantizeFloatArray(const Real * const floatArray, 
+                                                       unsigned long numfloatArraySize,
+                                                       unsigned long dimfloatArraySize,
+                                                       const Real * const minfloatArray,
+                                                       const Real * const maxfloatArray,
+                                                       unsigned long nQBits);
+        X3DGCErrorCode              EncodeIntArray(const long * const intArray, 
+                                                   unsigned long numIntArraySize,
+                                                   unsigned long dimIntArraySize,
+                                                   BinaryStream & bstream);
+        X3DGCErrorCode              EncodePredicionResidual(long predResidual, 
+                                                            BinaryStream & bstream, 
+                                                            bool predicted);        
+        TriangleListEncoder         m_triangleListEncoder;
+        long *                      m_quantFloatArray;
+        unsigned long               m_quantFloatArraySize;
+        X3DGCSC3DMCBinarization     m_binarization;
+    };
 }
 #endif // X3DGC_SC3DMC_ENCODER_H
 

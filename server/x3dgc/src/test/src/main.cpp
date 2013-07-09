@@ -28,11 +28,11 @@ THE SOFTWARE.
 #include <map>
 #include <string>
 #include <vector>
-#include <x3dgc_Vector.h>
-#include <x3dgc_SC3DMCEncodeParams.h>
-#include <x3dgc_IndexedFaceSet.h>
-#include <x3dgc_SC3DMCEncoder.h>
-#include <x3dgc_SC3DMCDecoder.h>
+#include "x3dgc_Vector.h"
+#include "x3dgc_SC3DMCEncodeParams.h"
+#include "x3dgc_IndexedFaceSet.h"
+#include "x3dgc_SC3DMCEncoder.h"
+#include "x3dgc_SC3DMCDecoder.h"
 
 
 using namespace x3dgc;
@@ -47,17 +47,17 @@ class IVec3Cmp
 {
    public:
       bool operator()(const Vec3<long> a,const Vec3<long> b) 
-	  { 
-		  if (a.X() != b.X())
-		  {
-			  return (a.X() > b.X());
-		  }
-		  else if (a.Y() != b.Y())
-		  {
-			  return (a.Y() > b.Y());
-		  }
-		  return (a.Z() > b.Z());
-	  }
+      { 
+          if (a.X() != b.X())
+          {
+              return (a.X() > b.X());
+          }
+          else if (a.Y() != b.Y())
+          {
+              return (a.Y() > b.Y());
+          }
+          return (a.Z() > b.Z());
+      }
 };
 
 
@@ -78,26 +78,26 @@ bool GenerateRandomFloatVector(std::vector< Real > & tab, size_t size, Real scal
 bool GenerateRandomIntVector  (std::vector< long > & tab, size_t size);
 int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnormal)
 {
-	std::string folder;
-	long found = fileName.find_last_of(PATH_SEP);
-	if (found != -1)
-	{
-		folder = fileName.substr(0,found);
-	}
-	if (folder == "")
+    std::string folder;
+    long found = fileName.find_last_of(PATH_SEP);
+    if (found != -1)
+    {
+        folder = fileName.substr(0,found);
+    }
+    if (folder == "")
     {
         folder = ".";
     }
-	std::string file(fileName.substr(found+1));
-	std::string outFileName = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + ".s3d";
-	std::vector< Vec3<Real> > points;
+    std::string file(fileName.substr(found+1));
+    std::string outFileName = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + ".s3d";
+    std::vector< Vec3<Real> > points;
     std::vector< Vec3<Real> > normals;
     std::vector< Vec2<Real> > texCoords;
-	std::vector< Real > tangent;
+    std::vector< Real > tangent;
     std::vector< Real > bitangent;
-	std::vector< Real > weights;
-	std::vector< long > bones;
-	std::vector< Vec3<long> > triangles;
+    std::vector< Real > weights;
+    std::vector< long > bones;
+    std::vector< Vec3<long> > triangles;
     bool ret = LoadOBJ(fileName, points, texCoords, normals, triangles);
     if (!ret)
     {
@@ -105,7 +105,7 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         return -1;
     }
 
-	ret = SaveOBJ("debug_mesh.obj", points, texCoords, normals, triangles);
+    ret = SaveOBJ("debug_mesh.obj", points, texCoords, normals, triangles);
     if (!ret)
     {
         std::cout << "Error: SaveOBJ()\n" << std::endl;
@@ -119,9 +119,9 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
 
     SC3DMCEncodeParams params;
     IndexedFaceSet ifs;
-	params.SetCoordQuantBits(qcoord);
-	params.SetNormalQuantBits(qnormal);
-	params.SetTexCoordQuantBits(qtexCoord);
+    params.SetCoordQuantBits(qcoord);
+    params.SetNormalQuantBits(qnormal);
+    params.SetTexCoordQuantBits(qtexCoord);
 
     ifs.SetNCoord(points.size());
     ifs.SetNNormal(normals.size());
@@ -139,41 +139,41 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         ifs.SetTexCoord((Real * const ) & (texCoords[0]));
     }
 
-	bool testAttributeEncoding = false;
-	if (testAttributeEncoding)
-	{
-		// add fake attributes
-		ifs.SetNumFloatAttributes(3);
-		ifs.SetNumIntAttributes(1);
-		
-		// tangent (attribute 0)
-		GenerateRandomFloatVector(tangent, 3 * points.size(), 1.0);
-		ifs.SetNFloatAttribute  (0, points.size());
-		ifs.SetFloatAttributeDim(0, 3);
-		ifs.SetFloatAttribute   (0, (Real * const) & (tangent[0]));
-		params.SetFloatAttributeQuantBits(0, 11);
+    bool testAttributeEncoding = false;
+    if (testAttributeEncoding)
+    {
+        // add fake attributes
+        ifs.SetNumFloatAttributes(3);
+        ifs.SetNumIntAttributes(1);
 
-		
-		// bitangent (attribute 1)
-		GenerateRandomFloatVector(bitangent, 3 * points.size(), 2.0);
-		ifs.SetNFloatAttribute  (1, points.size());
-		ifs.SetFloatAttributeDim(1, 3);
-		ifs.SetFloatAttribute   (1, (Real * const ) & (bitangent[0]));
-		params.SetFloatAttributeQuantBits(1, 12);
+        // tangent (attribute 0)
+        GenerateRandomFloatVector(tangent, 3 * points.size(), 1.0);
+        ifs.SetNFloatAttribute  (0, points.size());
+        ifs.SetFloatAttributeDim(0, 3);
+        ifs.SetFloatAttribute   (0, (Real * const) & (tangent[0]));
+        params.SetFloatAttributeQuantBits(0, 11);
 
-		// animation weights (attribute 2)
-		GenerateRandomFloatVector(weights, 4 * points.size(), 3.0);
-		ifs.SetNFloatAttribute  (2, points.size());
-		ifs.SetFloatAttributeDim(2, 4);
-		ifs.SetFloatAttribute   (2, (Real * const) & (weights[0]));
-		params.SetFloatAttributeQuantBits(2, 13);
+        
+        // bitangent (attribute 1)
+        GenerateRandomFloatVector(bitangent, 3 * points.size(), 2.0);
+        ifs.SetNFloatAttribute  (1, points.size());
+        ifs.SetFloatAttributeDim(1, 3);
+        ifs.SetFloatAttribute   (1, (Real * const ) & (bitangent[0]));
+        params.SetFloatAttributeQuantBits(1, 12);
 
-		// bones IDs
-		GenerateRandomIntVector(bones, 4 * points.size());
-		ifs.SetNIntAttribute  (0, points.size());
-		ifs.SetIntAttributeDim(0, 4);
-		ifs.SetIntAttribute   (0, (long * const) & (bones[0]));
-	}
+        // animation weights (attribute 2)
+        GenerateRandomFloatVector(weights, 4 * points.size(), 3.0);
+        ifs.SetNFloatAttribute  (2, points.size());
+        ifs.SetFloatAttributeDim(2, 4);
+        ifs.SetFloatAttribute   (2, (Real * const) & (weights[0]));
+        params.SetFloatAttributeQuantBits(2, 13);
+
+        // bones IDs
+        GenerateRandomIntVector(bones, 4 * points.size());
+        ifs.SetNIntAttribute  (0, points.size());
+        ifs.SetIntAttributeDim(0, 4);
+        ifs.SetIntAttribute   (0, (long * const) & (bones[0]));
+    }
 
     // compute min/max
     ifs.ComputeMinMax(X3DGC_SC3DMC_MAX_ALL_DIMS); // X3DGC_SC3DMC_DIAG_BB
@@ -187,28 +187,28 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
 }
 int testDecode(std::string fileName)
 {
-	std::string folder;
-	long found = fileName.find_last_of(PATH_SEP);
-	if (found != -1)
-	{
-		folder = fileName.substr(0,found);
-	}
-	if (folder == "")
+    std::string folder;
+    long found = fileName.find_last_of(PATH_SEP);
+    if (found != -1)
+    {
+        folder = fileName.substr(0,found);
+    }
+    if (folder == "")
     {
         folder = ".";
     }
-	std::string file(fileName.substr(found+1));
-	std::string outFileName = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + "_dec.obj";
+    std::string file(fileName.substr(found+1));
+    std::string outFileName = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + "_dec.obj";
 
-	std::vector< Vec3<Real> > points;
+    std::vector< Vec3<Real> > points;
     std::vector< Vec3<Real> > normals;
-	std::vector< Vec2<Real> > colors;
+    std::vector< Vec2<Real> > colors;
     std::vector< Vec2<Real> > texCoords;
-	std::vector< Vec3<long> > triangles;
-	std::vector< Real > tangent;
+    std::vector< Vec3<long> > triangles;
+    std::vector< Real > tangent;
     std::vector< Real > bitangent;
-	std::vector< Real > weights;
-	std::vector< long > bones;
+    std::vector< Real > weights;
+    std::vector< long > bones;
 
 
     BinaryStream bstream;
@@ -228,49 +228,49 @@ int testDecode(std::string fileName)
     points.resize(ifs.GetNCoord());
     ifs.SetCoord((Real * const ) &(points[0]));    
 
-	if (ifs.GetNNormal() > 0)
-	{
-		normals.resize(ifs.GetNNormal());
-		ifs.SetNormal((Real * const ) &(normals[0]));  
-	}
-	if (ifs.GetNColor() > 0)
-	{
-		colors.resize(ifs.GetNColor());
-		ifs.SetColor((Real * const ) &(colors[0]));  
-	}
-	if (ifs.GetNTexCoord() > 0)
-	{
-		texCoords.resize(ifs.GetNTexCoord());
-		ifs.SetTexCoord((Real * const ) &(texCoords[0]));
-	}
+    if (ifs.GetNNormal() > 0)
+    {
+        normals.resize(ifs.GetNNormal());
+        ifs.SetNormal((Real * const ) &(normals[0]));  
+    }
+    if (ifs.GetNColor() > 0)
+    {
+        colors.resize(ifs.GetNColor());
+        ifs.SetColor((Real * const ) &(colors[0]));  
+    }
+    if (ifs.GetNTexCoord() > 0)
+    {
+        texCoords.resize(ifs.GetNTexCoord());
+        ifs.SetTexCoord((Real * const ) &(texCoords[0]));
+    }
 
-	if (ifs.GetNFloatAttribute(0) > 0)
-	{
-		tangent.resize(ifs.GetNFloatAttribute(0)* ifs.GetFloatAttributeDim(0));
-		ifs.SetFloatAttribute(0, (Real * const ) &(tangent[0]));
-	}
+    if (ifs.GetNFloatAttribute(0) > 0)
+    {
+        tangent.resize(ifs.GetNFloatAttribute(0)* ifs.GetFloatAttributeDim(0));
+        ifs.SetFloatAttribute(0, (Real * const ) &(tangent[0]));
+    }
 
-	if (ifs.GetNFloatAttribute(1) > 0)
-	{
-		bitangent.resize(ifs.GetNFloatAttribute(1)* ifs.GetFloatAttributeDim(1));
-		ifs.SetFloatAttribute(1, (Real * const ) &(bitangent[0]));
-	}
-	
-	if (ifs.GetNFloatAttribute(2) > 0)
-	{
-		weights.resize(ifs.GetNFloatAttribute(2) * ifs.GetFloatAttributeDim(2));
-		ifs.SetFloatAttribute(2, (Real * const ) &(weights[0]));
-	}
+    if (ifs.GetNFloatAttribute(1) > 0)
+    {
+        bitangent.resize(ifs.GetNFloatAttribute(1)* ifs.GetFloatAttributeDim(1));
+        ifs.SetFloatAttribute(1, (Real * const ) &(bitangent[0]));
+    }
+    
+    if (ifs.GetNFloatAttribute(2) > 0)
+    {
+        weights.resize(ifs.GetNFloatAttribute(2) * ifs.GetFloatAttributeDim(2));
+        ifs.SetFloatAttribute(2, (Real * const ) &(weights[0]));
+    }
 
-	if (ifs.GetNIntAttribute(0) > 0)
-	{
-		bones.resize(ifs.GetNIntAttribute(0) * ifs.GetIntAttributeDim(0));
-		ifs.SetIntAttribute(0, (long * const ) &(bones[0]));
-	}
+    if (ifs.GetNIntAttribute(0) > 0)
+    {
+        bones.resize(ifs.GetNIntAttribute(0) * ifs.GetIntAttributeDim(0));
+        ifs.SetIntAttribute(0, (long * const ) &(bones[0]));
+    }
 
     // decode mesh
     decoder.DecodePlayload(ifs, bstream);
-	int ret = SaveOBJ(outFileName.c_str(), points, texCoords, normals, triangles);
+    int ret = SaveOBJ(outFileName.c_str(), points, texCoords, normals, triangles);
     if (!ret)
     {
         std::cout << "Error: SaveOBJ()\n" << std::endl;
@@ -283,111 +283,111 @@ int testDecode(std::string fileName)
 
 enum Mode
 {
-	UNKNOWN = 0,
+    UNKNOWN = 0,
     ENCODE  = 1,
-	DECODE  = 2
+    DECODE  = 2
 };
 
 int main(int argc, char * argv[])
 {
-	Mode mode = UNKNOWN;
-	std::string inputFileName;
-	int qcoord    = 12;
-	int qtexCoord = 10;
-	int qnormal   = 10;
-	for(int i = 1; i < argc; ++i)
-	{
-		if ( !strcmp(argv[i], "-c"))
-		{
-			mode = ENCODE;
-		}
-		else if ( !strcmp(argv[i], "-d"))
-		{
-			mode = DECODE;
-		}
-		else if ( !strcmp(argv[i], "-i"))
-		{
-			++i;
-			if (i < argc)
-			{
-				inputFileName = argv[i];
-			}
-		}
-		else if ( !strcmp(argv[i], "-qc"))
-		{
-			++i;
-			if (i < argc)
-			{
-				qcoord = atoi(argv[i]);
-			}
-		}
-		else if ( !strcmp(argv[i], "-qn"))
-		{
-			++i;
-			if (i < argc)
-			{
-				qnormal = atoi(argv[i]);
-			}
-		}
-		else if ( !strcmp(argv[i], "-qt"))
-		{
-			++i;
-			if (i < argc)
-			{
-				qtexCoord = atoi(argv[i]);
-			}
-		}		
-	}
+    Mode mode = UNKNOWN;
+    std::string inputFileName;
+    int qcoord    = 12;
+    int qtexCoord = 10;
+    int qnormal   = 10;
+    for(int i = 1; i < argc; ++i)
+    {
+        if ( !strcmp(argv[i], "-c"))
+        {
+            mode = ENCODE;
+        }
+        else if ( !strcmp(argv[i], "-d"))
+        {
+            mode = DECODE;
+        }
+        else if ( !strcmp(argv[i], "-i"))
+        {
+            ++i;
+            if (i < argc)
+            {
+                inputFileName = argv[i];
+            }
+        }
+        else if ( !strcmp(argv[i], "-qc"))
+        {
+            ++i;
+            if (i < argc)
+            {
+                qcoord = atoi(argv[i]);
+            }
+        }
+        else if ( !strcmp(argv[i], "-qn"))
+        {
+            ++i;
+            if (i < argc)
+            {
+                qnormal = atoi(argv[i]);
+            }
+        }
+        else if ( !strcmp(argv[i], "-qt"))
+        {
+            ++i;
+            if (i < argc)
+            {
+                qtexCoord = atoi(argv[i]);
+            }
+        }        
+    }
 
-	if (inputFileName.size() == 0 || mode == UNKNOWN)
+    if (inputFileName.size() == 0 || mode == UNKNOWN)
     {
         std::cout << "Usage: ./test_x3dgc [-c|d] [-qc QuantBits] [-qt QuantBits] [-qn QuantBits] -i fileName.obj "<< std::endl;
-		std::cout << "\t -c \t Encode"<< std::endl;
-		std::cout << "\t -d \t Decode"<< std::endl;
-		std::cout << "\t -qc \t Quantization bits for positions (default=11, range = {8,...,15})"<< std::endl;
-		std::cout << "\t -qn \t Quantization bits for normals (default=10, range = {8,...,15})"<< std::endl;
-		std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
-		std::cout << "Examples:"<< std::endl;
-		std::cout << "\t Encode: test_x3dgc -c fileName.obj"<< std::endl;
-		std::cout << "\t Decode: test_x3dgc -d fileName.s3d"<< std::endl;
+        std::cout << "\t -c \t Encode"<< std::endl;
+        std::cout << "\t -d \t Decode"<< std::endl;
+        std::cout << "\t -qc \t Quantization bits for positions (default=11, range = {8,...,15})"<< std::endl;
+        std::cout << "\t -qn \t Quantization bits for normals (default=10, range = {8,...,15})"<< std::endl;
+        std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
+        std::cout << "Examples:"<< std::endl;
+        std::cout << "\t Encode: test_x3dgc -c fileName.obj"<< std::endl;
+        std::cout << "\t Decode: test_x3dgc -d fileName.s3d"<< std::endl;
         return -1;
     }
-	int ret;
-	if (mode == ENCODE)
-	{
-		ret = testEncode(inputFileName, qcoord, qtexCoord, qnormal);
-	}
-	else
-	{
-		ret = testDecode(inputFileName);
-	}
+    int ret;
+    if (mode == ENCODE)
+    {
+        ret = testEncode(inputFileName, qcoord, qtexCoord, qnormal);
+    }
+    else
+    {
+        ret = testDecode(inputFileName);
+    }
     if (ret)
     {
         std::cout << "Error " << ret << std::endl;
         return ret;
     }
-	return 0;
+    return 0;
 }
 bool GenerateRandomFloatVector(std::vector< Real > & tab, size_t size, Real scale)
 {
-	tab.resize(size);
-	srand (0);
-	for(size_t i = 0; i < size; ++i)
-	{
-		tab[i] = scale * ((Real)(rand() % 1000) / 500.0f - 1.0f);
-	}
-	return true;
+    tab.resize(size);
+    srand (0);
+    for(size_t i = 0; i < size; ++i)
+    {
+        tab[i] = scale * ((Real)(rand() % 1000) / 500.0f - 1.0f);
+    }
+    return true;
 }
 
 bool GenerateRandomIntVector(std::vector< long > & tab, size_t size)
 {
-	tab.resize(size);
-	srand (0);
-	for(size_t i = 0; i < size; ++i)
-	{
-		tab[i] = rand() % 10;
-	}
-	return true;
+    tab.resize(size);
+    srand (0);
+    for(size_t i = 0; i < size; ++i)
+    {
+        tab[i] = rand() % 10;
+    }
+    return true;
 }
 
 
@@ -397,26 +397,26 @@ bool LoadOBJ(const std::string & fileName,
              std::vector< Vec3<Real> > & unormals,
              std::vector< Vec3<long> > & triangles) 
 {   
-    const char ObjDelimiters[]=" /";                  
+    const char ObjDelimiters[]=" /";
     const size_t BufferSize = 1024;
-	FILE * fid = fopen(fileName.c_str(), "r");
+    FILE * fid = fopen(fileName.c_str(), "r");
     
-	if (fid) 
+    if (fid) 
     {        
         char buffer[BufferSize];
         Real  x[3];
-		long ip[3] = {-1, -1, -1};
+        long ip[3] = {-1, -1, -1};
         long in[3] = {-1, -1, -1};
         long it[3] = {-1, -1, -1};
         char * pch;
         char * str;
-		long nv = 0;
-		Vec3<long> vertex;
-		Vec3<long> triangle;
+        long nv = 0;
+        Vec3<long> vertex;
+        Vec3<long> triangle;
         std::vector< Vec3<Real> > points;
         std::vector< Vec2<Real> > texCoords;
         std::vector< Vec3<Real> > normals;
-		std::map< Vec3<long>, long, IVec3Cmp > vertices;
+        std::map< Vec3<long>, long, IVec3Cmp > vertices;
 
         while (!feof(fid)) 
         {
@@ -482,61 +482,61 @@ bool LoadOBJ(const std::string & fileName,
                         else      return false;
                     }
                 }
-				for(int k = 0; k < 3; ++k)
-				{
-					vertex.X() = ip[k];
-					vertex.Y() = in[k];
-					vertex.Z() = it[k];
-					std::map< Vec3<long>, long, IVec3Cmp >::iterator it = vertices.find(vertex);
-					if ( it == vertices.end() )
-					{
-						vertices[vertex] = nv;
-						triangle[k]		 = nv;
-						++nv;
-					}
-					else
-					{
-						triangle[k]		 =  it->second;
-					}
-				}				
-				triangles.push_back(triangle);
+                for(int k = 0; k < 3; ++k)
+                {
+                    vertex.X() = ip[k];
+                    vertex.Y() = in[k];
+                    vertex.Z() = it[k];
+                    std::map< Vec3<long>, long, IVec3Cmp >::iterator it = vertices.find(vertex);
+                    if ( it == vertices.end() )
+                    {
+                        vertices[vertex] = nv;
+                        triangle[k]         = nv;
+                        ++nv;
+                    }
+                    else
+                    {
+                        triangle[k]         =  it->second;
+                    }
+                }                
+                triangles.push_back(triangle);
             }
         }
-		if (points.size() > 0)
-		{
-			upoints.resize(nv);
-		}
-		if (normals.size() > 0)
-		{
-			unormals.resize(nv);
-		}
-		if (texCoords.size() > 0)
-		{
-			utexCoords.resize(nv);
-		}
-		for (std::map< Vec3<long>, long, IVec3Cmp >::iterator it = vertices.begin(); it != vertices.end(); ++it)
-		{
-			if (points.size() > 0)
-			{
-				upoints   [it->second]	= points   [(it->first).X()];
-			}
-			if (normals.size() > 0)
-			{
-				unormals  [it->second]	= normals  [(it->first).Y()];
-			}
-			if (texCoords.size() > 0)
-			{
-				utexCoords[it->second]	= texCoords[(it->first).Z()];
-			}
-		}
+        if (points.size() > 0)
+        {
+            upoints.resize(nv);
+        }
+        if (normals.size() > 0)
+        {
+            unormals.resize(nv);
+        }
+        if (texCoords.size() > 0)
+        {
+            utexCoords.resize(nv);
+        }
+        for (std::map< Vec3<long>, long, IVec3Cmp >::iterator it = vertices.begin(); it != vertices.end(); ++it)
+        {
+            if (points.size() > 0)
+            {
+                upoints   [it->second]    = points   [(it->first).X()];
+            }
+            if (normals.size() > 0)
+            {
+                unormals  [it->second]    = normals  [(it->first).Y()];
+            }
+            if (texCoords.size() > 0)
+            {
+                utexCoords[it->second]    = texCoords[(it->first).Z()];
+            }
+        }
         fclose(fid);
     }
-	else 
+    else 
     {
-		printf( "File not found \n");
-		return false;
+        printf( "File not found \n");
+        return false;
     }
-	return true;
+    return true;
 }
 
 
@@ -547,8 +547,8 @@ bool SaveOBJ(const char * fileName,
              const std::vector< Vec3<Real> > & normals,
              const std::vector< Vec3<long> > & triangles)
 {
-	FILE * fid = fopen(fileName, "w");
-	if (fid) 
+    FILE * fid = fopen(fileName, "w");
+    if (fid) 
     {
         const size_t np = points.size();
         const size_t nn = normals.size();
@@ -583,8 +583,8 @@ bool SaveOBJ(const char * fileName,
             for(size_t i = 0; i < nf; ++i)
             {
                 fprintf(fid,"f %ld/%ld/%ld %ld/%ld/%ld %ld/%ld/%ld\n", triangles[i].X()+1, triangles[i].X()+1, triangles[i].X()+1,
-													          triangles[i].Y()+1, triangles[i].Y()+1, triangles[i].Y()+1, 
-														      triangles[i].Z()+1, triangles[i].Z()+1, triangles[i].Z()+1);
+                                                                       triangles[i].Y()+1, triangles[i].Y()+1, triangles[i].Y()+1, 
+                                                                       triangles[i].Z()+1, triangles[i].Z()+1, triangles[i].Z()+1);
             }
         }
         else if (nt == 0 && nn > 0)
@@ -592,8 +592,8 @@ bool SaveOBJ(const char * fileName,
             for(size_t i = 0; i < nf; ++i)
             {
                 fprintf(fid,"f %ld//%ld %ld//%ld %ld//%ld\n", triangles[i].X()+1, triangles[i].X()+1,
-													    triangles[i].Y()+1, triangles[i].Y()+1, 
-														triangles[i].Z()+1, triangles[i].Z()+1);
+                                                              triangles[i].Y()+1, triangles[i].Y()+1, 
+                                                              triangles[i].Z()+1, triangles[i].Z()+1);
             }
         }
         else if (nt > 0 && nn == 0)
@@ -601,8 +601,8 @@ bool SaveOBJ(const char * fileName,
             for(size_t i = 0; i < nf; ++i)
             {
                 fprintf(fid,"f %ld/%ld %ld/%ld %ld/%ld\n", triangles[i].X()+1, triangles[i].X()+1,
-												     triangles[i].Y()+1, triangles[i].Y()+1, 
-													 triangles[i].Z()+1, triangles[i].Z()+1);
+                                                           triangles[i].Y()+1, triangles[i].Y()+1, 
+                                                           triangles[i].Z()+1, triangles[i].Z()+1);
             }
         }
         else
@@ -612,11 +612,11 @@ bool SaveOBJ(const char * fileName,
                 fprintf(fid,"f %ld %ld %ld\n", triangles[i].X()+1, triangles[i].Y()+1, triangles[i].Z()+1);
             }
         }
-		fclose(fid);
-	}
-	else 
+        fclose(fid);
+    }
+    else 
     {
-		printf( "Not able to create file\n");
-	}
-	return true;
+        printf( "Not able to create file\n");
+    }
+    return true;
 }

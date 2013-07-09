@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <x3dgc_IndexedFaceSet.h>
 #include <math.h>
+#include "x3dgc_IndexedFaceSet.h"
 
 namespace x3dgc
 {
@@ -30,7 +30,7 @@ namespace x3dgc
                              size_t dim,
                              Real * minTab,
                              Real * maxTab,
-							 X3DGCSC3DMCQuantizationMode quantMode)
+                             X3DGCSC3DMCQuantizationMode quantMode)
     {
         if (size == 0 || dim == 0)
         {
@@ -51,38 +51,38 @@ namespace x3dgc
             }
         }
 
-		if (quantMode == X3DGC_SC3DMC_DIAG_BB)
-		{
-			Real diag = 0.0;
-			Real r;
-			for(size_t d = 0; d < dim; ++d)
-			{
-				r     = (maxTab[d] - minTab[d]);
-				diag += r*r;
-			} 
-			diag = sqrt(diag);
-			for(size_t d = 0; d < dim; ++d)
-			{
-				 maxTab[d] = minTab[d] + diag;
-			} 
-		}
-		else if (quantMode == X3DGC_SC3DMC_MAX_ALL_DIMS)
-		{			
-			Real maxr = (maxTab[0] - minTab[0]);
-			Real r;
-			for(size_t d = 1; d < dim; ++d)
-			{
-				r = (maxTab[d] - minTab[d]);
-				if ( r > maxr)
-				{
-					maxr = r;
-				}
-			} 
-			for(size_t d = 0; d < dim; ++d)
-			{
-				 maxTab[d] = minTab[d] + maxr;
-			} 
-		}
+        if (quantMode == X3DGC_SC3DMC_DIAG_BB)
+        {
+            Real diag = 0.0;
+            Real r;
+            for(size_t d = 0; d < dim; ++d)
+            {
+                r     = (maxTab[d] - minTab[d]);
+                diag += r*r;
+            } 
+            diag = sqrt(diag);
+            for(size_t d = 0; d < dim; ++d)
+            {
+                 maxTab[d] = minTab[d] + diag;
+            } 
+        }
+        else if (quantMode == X3DGC_SC3DMC_MAX_ALL_DIMS)
+        {            
+            Real maxr = (maxTab[0] - minTab[0]);
+            Real r;
+            for(size_t d = 1; d < dim; ++d)
+            {
+                r = (maxTab[d] - minTab[d]);
+                if ( r > maxr)
+                {
+                    maxr = r;
+                }
+            } 
+            for(size_t d = 0; d < dim; ++d)
+            {
+                 maxTab[d] = minTab[d] + maxr;
+            } 
+        }
     }
     void IndexedFaceSet::ComputeMinMax(X3DGCSC3DMCQuantizationMode quantMode)
     {
@@ -96,7 +96,7 @@ namespace x3dgc
             ComputeVectorMinMax(m_floatAttribute[a], m_nFloatAttribute[a],m_dimFloatAttribute[a],
                                 m_minFloatAttribute + (a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES), 
                                 m_maxFloatAttribute + (a * X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES), quantMode);
-	    }
+        }
     }
 }
 

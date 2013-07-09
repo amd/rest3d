@@ -25,73 +25,73 @@ THE SOFTWARE.
 #ifndef X3DGC_FIFO_H
 #define X3DGC_FIFO_H
 
-#include <x3dgc_Common.h>
+#include "x3dgc_Common.h"
 
 namespace x3dgc
 {
-	//! 
+    //! 
     template < typename T > class FIFO
-	{
-    public:	
-		//! Constructor.
-																FIFO()
-																{
-																	m_buffer    = 0;
-																	m_allocated = 0;
-																	m_size      = 0;
-																	m_start     = 0;
-																	m_end       = 0;
-																};
-		//! Destructor.
-																~FIFO(void)
-																{
-																	delete [] m_buffer;
-																};
-		X3DGCErrorCode											Allocate(size_t size)
-																{
-                                                                    assert(size > 0);
-																	if (size > m_allocated)
-																	{
-																		delete [] m_buffer;
-																		m_allocated = size;
-																		m_buffer = new T [m_allocated];
-																	}
-																	Clear();
-																	return X3DGC_OK;
-																}
-		const T &												PopFirst()
-																{
-                                                                    assert(m_size > 0);
-                                                                    --m_size;
-                                                                    size_t current = m_start++;
-																	if (m_start == m_allocated) 
-																	{
-																		m_end = 0;
-																	}																	
-																	return m_buffer[current];
-																};
-		void													PushBack(const T & value)
-																{
-																	assert( m_size < m_allocated);
-																	m_buffer[m_end] = value;
-																	++m_size;
-																	++m_end;
-																	if (m_end == m_allocated) 
-																	{
-																		m_end = 0;
-																	}
-																}
-		const size_t											GetSize()          const { return m_size;};
-		const size_t											GetAllocatedSize() const { return m_allocated;};
-		void													Clear()            { m_start = m_end = m_size = 0;};	
+    {
+    public:
+        //! Constructor.
+                                FIFO()
+                                {
+                                    m_buffer    = 0;
+                                    m_allocated = 0;
+                                    m_size      = 0;
+                                    m_start     = 0;
+                                    m_end       = 0;
+                                };
+        //! Destructor.
+                                ~FIFO(void)
+                                {
+                                    delete [] m_buffer;
+                                };
+        X3DGCErrorCode          Allocate(size_t size)
+                                {
+                                    assert(size > 0);
+                                    if (size > m_allocated)
+                                    {
+                                        delete [] m_buffer;
+                                        m_allocated = size;
+                                        m_buffer = new T [m_allocated];
+                                    }
+                                    Clear();
+                                    return X3DGC_OK;
+                                }
+        const T &               PopFirst()
+                                {
+                                    assert(m_size > 0);
+                                    --m_size;
+                                    size_t current = m_start++;
+                                    if (m_start == m_allocated) 
+                                    {
+                                        m_end = 0;
+                                    }
+                                    return m_buffer[current];
+                                };
+        void                    PushBack(const T & value)
+                                {
+                                    assert( m_size < m_allocated);
+                                    m_buffer[m_end] = value;
+                                    ++m_size;
+                                    ++m_end;
+                                    if (m_end == m_allocated) 
+                                    {
+                                        m_end = 0;
+                                    }
+                                }
+        const size_t            GetSize()          const { return m_size;};
+        const size_t            GetAllocatedSize() const { return m_allocated;};
+        void                    Clear() { m_start = m_end = m_size = 0;};
 
-	private:
-		T *														m_buffer;
-		size_t													m_allocated;
-		size_t													m_size;
-		size_t													m_start;
-		size_t													m_end;
-	};
+    private:
+        T *                     m_buffer;
+        size_t                  m_allocated;
+        size_t                  m_size;
+        size_t                  m_start;
+        size_t                  m_end;
+    };
 }
 #endif // X3DGC_FIFO_H
 

@@ -25,137 +25,132 @@ THE SOFTWARE.
 #ifndef X3DGC_ADJACENCY_INFO_H
 #define X3DGC_ADJACENCY_INFO_H
 
-#include <x3dgc_Common.h>
+#include "x3dgc_Common.h"
 
 namespace x3dgc
 {
-	class TriangleListEncoder;
-
-	const long X3DGC_MIN_NEIGHBORS_SIZE     = 128;
-	const long X3DGC_MIN_NUM_NEIGHBORS_SIZE = 16;
-	
-	//! 
+    class TriangleListEncoder;
+    const long X3DGC_MIN_NEIGHBORS_SIZE     = 128;
+    const long X3DGC_MIN_NUM_NEIGHBORS_SIZE = 16;
+    //! 
     class AdjacencyInfo
-	{
-    public:	
-		//! Constructor.
-																AdjacencyInfo(long numNeighborsSize = X3DGC_MIN_NUM_NEIGHBORS_SIZE, 
-																			  long neighborsSize    = X3DGC_MIN_NUM_NEIGHBORS_SIZE)																	
-																{
-																	m_numElements	   = 0;
-																	m_neighborsSize    = neighborsSize; 
-																	m_numNeighborsSize = numNeighborsSize;
-																	m_numNeighbors	   = new long [m_numNeighborsSize];
-																	m_neighbors		   = new long [m_neighborsSize   ];
-																};
-		//! Destructor.
-																~AdjacencyInfo(void)
-																{
-																	delete [] m_neighbors;
-																	delete [] m_numNeighbors;
-																};
-        X3DGCErrorCode                                          Allocate(long numNeighborsSize, long neighborsSize)
-                                                                {
-																	m_numElements	   = numNeighborsSize;
-                                                                    if (neighborsSize > m_neighborsSize)
-                                                                    {
-                                                                        delete [] m_numNeighbors;
-																	    m_neighborsSize    = neighborsSize;                                                                         
-                                                                        m_numNeighbors	   = new long [m_numNeighborsSize];
-                                                                    }
-                                                                    if (numNeighborsSize > m_numNeighborsSize)
-                                                                    {
-                                                                        delete [] m_neighbors;
-																	    m_numNeighborsSize = numNeighborsSize;																	
-																	    m_neighbors		   = new long [m_neighborsSize];
-                                                                    }
-																	return X3DGC_OK;
-                                                                }
-		X3DGCErrorCode											AllocateNumNeighborsArray(long numElements)
-																{
-																	if (numElements > m_numNeighborsSize)
-																	{
-																		delete [] m_numNeighbors;
-																		m_numNeighborsSize = numElements;
-																		m_numNeighbors = new long [m_numNeighborsSize];
-																	}
-																	m_numElements = numElements;
-																	return X3DGC_OK;
-																}
-		X3DGCErrorCode											AllocateNeighborsArray()
-																{
-																	for(long i = 1; i < m_numElements; ++i)
-																	{
-																		m_numNeighbors[i] += m_numNeighbors[i-1];
-																	}
-
-																	if (m_numNeighbors[m_numElements-1] > m_neighborsSize)
-																	{
-																		delete [] m_neighbors;
-																		m_neighborsSize = m_numNeighbors[m_numElements-1];
-																		m_neighbors = new long [m_neighborsSize];
-																	}
-																	return X3DGC_OK;
-																}
-		X3DGCErrorCode											ClearNumNeighborsArray()
-																{
-																	memset(m_numNeighbors, 0x00, sizeof(long) * m_numElements);
-																	return X3DGC_OK;
-																}
-		X3DGCErrorCode											ClearNeighborsArray()
-																{
-																	memset(m_neighbors, 0xFF, sizeof(long) * m_neighborsSize);
-																	return X3DGC_OK;
-																}
-		X3DGCErrorCode											AddNeighbor(long element, long neighbor)
-																{
-																	assert(m_numNeighbors[element] <= m_numNeighbors[m_numElements-1]);
-																	long p0 = Begin(element);
-																	long p1 = End(element);
-																	for(long p = p0; p < p1; p++)
-																	{
-																		if (m_neighbors[p] == -1)
-																		{
-																			m_neighbors[p] = neighbor;
-																			return X3DGC_OK;
-																		}
-																	}
-																	return X3DGC_ERROR_BUFFER_FULL;
-																}
-		long													Begin(long element) const 
-																{
-																	assert(element < m_numElements);
-																	assert(element >= 0);
-																	return (element>0)?m_numNeighbors[element-1]:0;
-																}
-		long													End(long element) const
-																{
-																	assert(element < m_numElements);
-																	assert(element >= 0);
-																	return m_numNeighbors[element];
-																}
-		long													GetNeighbor(long element) const
-																{
-																	assert(element < m_neighborsSize);
-																	assert(element >= 0);
-																	return m_neighbors[element];
-																}	
-		long													GetNumNeighbors(long element)  const 
-																{ 
-																	return End(element) - Begin(element);
-																}
-
-
-	private:
-		long													m_neighborsSize;				// actual allocated size for m_neighbors
-		long 													m_numNeighborsSize;				// actual allocated size for m_numNeighbors
-		long													m_numElements;					// number of elements 
-		long *													m_neighbors;					// 
-		long *													m_numNeighbors;					// 
-		
-	friend class TriangleListEncoder;
-    friend class TriangleListDecoder;
-	};
+    {
+    public:
+        //! Constructor.
+                                AdjacencyInfo(long numNeighborsSize = X3DGC_MIN_NUM_NEIGHBORS_SIZE,
+                                              long neighborsSize    = X3DGC_MIN_NUM_NEIGHBORS_SIZE)
+                                {
+                                    m_numElements      = 0;
+                                    m_neighborsSize    = neighborsSize; 
+                                    m_numNeighborsSize = numNeighborsSize;
+                                    m_numNeighbors     = new long [m_numNeighborsSize];
+                                    m_neighbors        = new long [m_neighborsSize   ];
+                                };
+        //! Destructor.
+                                ~AdjacencyInfo(void)
+                                {
+                                    delete [] m_neighbors;
+                                    delete [] m_numNeighbors;
+                                };
+        X3DGCErrorCode          Allocate(long numNeighborsSize, long neighborsSize)
+                                {
+                                    m_numElements = numNeighborsSize;
+                                    if (neighborsSize > m_neighborsSize)
+                                    {
+                                        delete [] m_numNeighbors;
+                                        m_neighborsSize    = neighborsSize;
+                                        m_numNeighbors     = new long [m_numNeighborsSize];
+                                    }
+                                    if (numNeighborsSize > m_numNeighborsSize)
+                                    {
+                                        delete [] m_neighbors;
+                                        m_numNeighborsSize = numNeighborsSize;
+                                        m_neighbors        = new long [m_neighborsSize];
+                                    }
+                                    return X3DGC_OK;
+                                }
+        X3DGCErrorCode          AllocateNumNeighborsArray(long numElements)
+                                {
+                                    if (numElements > m_numNeighborsSize)
+                                    {
+                                        delete [] m_numNeighbors;
+                                        m_numNeighborsSize = numElements;
+                                        m_numNeighbors = new long [m_numNeighborsSize];
+                                    }
+                                    m_numElements = numElements;
+                                    return X3DGC_OK;
+                                }
+        X3DGCErrorCode          AllocateNeighborsArray()
+                                {
+                                    for(long i = 1; i < m_numElements; ++i)
+                                    {
+                                        m_numNeighbors[i] += m_numNeighbors[i-1];
+                                    }
+                                    if (m_numNeighbors[m_numElements-1] > m_neighborsSize)
+                                    {
+                                        delete [] m_neighbors;
+                                        m_neighborsSize = m_numNeighbors[m_numElements-1];
+                                        m_neighbors = new long [m_neighborsSize];
+                                    }
+                                    return X3DGC_OK;
+                                }
+        X3DGCErrorCode          ClearNumNeighborsArray()
+                                {
+                                    memset(m_numNeighbors, 0x00, sizeof(long) * m_numElements);
+                                    return X3DGC_OK;
+                                }
+        X3DGCErrorCode          ClearNeighborsArray()
+                                {
+                                    memset(m_neighbors, 0xFF, sizeof(long) * m_neighborsSize);
+                                    return X3DGC_OK;
+                                }
+        X3DGCErrorCode          AddNeighbor(long element, long neighbor)
+                                {
+                                    assert(m_numNeighbors[element] <= m_numNeighbors[m_numElements-1]);
+                                    long p0 = Begin(element);
+                                    long p1 = End(element);
+                                    for(long p = p0; p < p1; p++)
+                                    {
+                                        if (m_neighbors[p] == -1)
+                                        {
+                                            m_neighbors[p] = neighbor;
+                                            return X3DGC_OK;
+                                        }
+                                    }
+                                    return X3DGC_ERROR_BUFFER_FULL;
+                                }
+        long                    Begin(long element) const 
+                                {
+                                    assert(element < m_numElements);
+                                    assert(element >= 0);
+                                    return (element>0)?m_numNeighbors[element-1]:0;
+                                }
+        long                    End(long element) const
+                                {
+                                    assert(element < m_numElements);
+                                    assert(element >= 0);
+                                    return m_numNeighbors[element];
+                                }
+        long                    GetNeighbor(long element) const
+                                {
+                                    assert(element < m_neighborsSize);
+                                    assert(element >= 0);
+                                    return m_neighbors[element];
+                                }    
+        long                    GetNumNeighbors(long element)  const 
+                                { 
+                                    return End(element) - Begin(element);
+                                }
+    private:
+        long                    m_neighborsSize;    // actual allocated size for m_neighbors
+        long                    m_numNeighborsSize; // actual allocated size for m_numNeighbors
+        long                    m_numElements;      // number of elements 
+        long *                  m_neighbors;        // 
+        long *                  m_numNeighbors;     // 
+        
+        friend class TriangleListEncoder;
+        friend class TriangleListDecoder;
+    };
 }
 #endif // X3DGC_ADJACENCY_INFO_H
 
