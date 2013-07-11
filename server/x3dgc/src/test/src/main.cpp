@@ -152,6 +152,7 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         ifs.SetFloatAttributeDim(0, 3);
         ifs.SetFloatAttribute   (0, (Real * const) & (tangent[0]));
         params.SetFloatAttributeQuantBits(0, 11);
+        params.SetFloatAttributePredMode(0, X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
 
         
         // bitangent (attribute 1)
@@ -160,6 +161,7 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         ifs.SetFloatAttributeDim(1, 3);
         ifs.SetFloatAttribute   (1, (Real * const ) & (bitangent[0]));
         params.SetFloatAttributeQuantBits(1, 12);
+        params.SetFloatAttributePredMode(1, X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
 
         // animation weights (attribute 2)
         GenerateRandomFloatVector(weights, 4 * points.size(), 3.0);
@@ -167,12 +169,14 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         ifs.SetFloatAttributeDim(2, 4);
         ifs.SetFloatAttribute   (2, (Real * const) & (weights[0]));
         params.SetFloatAttributeQuantBits(2, 13);
+        params.SetFloatAttributePredMode(2, X3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
 
         // bones IDs
         GenerateRandomIntVector(bones, 4 * points.size());
         ifs.SetNIntAttribute  (0, points.size());
         ifs.SetIntAttributeDim(0, 4);
         ifs.SetIntAttribute   (0, (long * const) & (bones[0]));
+        params.SetIntAttributePredMode(0, X3DGC_SC3DMC_NO_PREDICTION);
     }
 
     // compute min/max

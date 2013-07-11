@@ -113,12 +113,12 @@ namespace x3dgc
         void                        SetNormalPredMode  (X3DGCSC3DMCPredictionMode normalPredMode  ) { m_normalPredMode   = normalPredMode  ; }
         void                        SetColorPredMode   (X3DGCSC3DMCPredictionMode colorPredMode   ) { m_colorPredMode    = colorPredMode   ; }
         void                        SetTexCoordPredMode(X3DGCSC3DMCPredictionMode texCoordPredMode) { m_texCoordPredMode = texCoordPredMode; }
-        void                        GetFloatAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
+        void                        SetFloatAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
                                     { 
                                        assert(a < X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                        m_floatAttributePredMode[a] = p;
                                     }                       
-        void                        GetIntAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
+        void                        SetIntAttributePredMode(unsigned long a, X3DGCSC3DMCPredictionMode p) 
                                     { 
                                         assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                         m_intAttributePredMode[a] = p;
