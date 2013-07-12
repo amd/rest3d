@@ -68,7 +68,7 @@ namespace x3dgc
                                            const BinaryStream & bstream,
                                            unsigned long & iterator)
                                     {
-                                        unsigned long maxSizeV2T = bstream.ReadUInt32(iterator);
+                                        unsigned long maxSizeV2T = bstream.ReadUInt32ASCII(iterator);
                                         Init(triangles, numTriangles, numVertices, maxSizeV2T);
                                         m_ctfans.Load(bstream, iterator);
                                         Decompress();

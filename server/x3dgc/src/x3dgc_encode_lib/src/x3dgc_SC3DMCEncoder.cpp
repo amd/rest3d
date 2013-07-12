@@ -26,6 +26,10 @@ THE SOFTWARE.
 
 namespace x3dgc
 {
+#ifdef DEBUG_VERBOSE
+        FILE* g_fileDebugEnc = NULL;
+#endif //DEBUG_VERBOSE
+
     X3DGCErrorCode SC3DMCEncoder::Encode(const SC3DMCEncodeParams & params, 
                                   const IndexedFaceSet & ifs, 
                                   BinaryStream & bstream)
@@ -35,18 +39,18 @@ namespace x3dgc
         EncodeHeader(params, ifs, bstream);
         // Encode payload
         EncodePayload(params, ifs, bstream);
-        bstream.WriteUInt32(4, bstream.GetSize() - start);
+        bstream.WriteUInt32ASCII(X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32, bstream.GetSize() - start);
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodeHeader(const SC3DMCEncodeParams & params, 
                                         const IndexedFaceSet & ifs, 
                                         BinaryStream & bstream)
     {
-        bstream.WriteUInt32(X3DGC_SC3DMC_START_CODE);
-        bstream.WriteUInt32(0); // to be filled later
+        bstream.WriteUInt32ASCII(X3DGC_SC3DMC_START_CODE);
+        bstream.WriteUInt32ASCII(0); // to be filled later
 
-        bstream.WriteUChar8(X3DGC_SC3DMC_TFAN);
-        bstream.WriteFloat32((float)ifs.GetCreaseAngle());
+        bstream.WriteUCharASCII(X3DGC_SC3DMC_TFAN);
+        bstream.WriteFloat32ASCII((float)ifs.GetCreaseAngle());
           
         unsigned char mask = 0;
         bool markerBit0 = false;
@@ -63,84 +67,84 @@ namespace x3dgc
         mask += (markerBit2                << 6);
         mask += (markerBit3                << 7);
 
-        bstream.WriteUChar8(mask);
+        bstream.WriteUCharASCII(mask);
 
-        bstream.WriteUInt32(ifs.GetNCoord());
-        bstream.WriteUInt32(ifs.GetNNormal());
-        bstream.WriteUInt32(ifs.GetNColor());
-        bstream.WriteUInt32(ifs.GetNTexCoord());
-        bstream.WriteUInt32(ifs.GetNumFloatAttributes());
-        bstream.WriteUInt32(ifs.GetNumIntAttributes());
+        bstream.WriteUInt32ASCII(ifs.GetNCoord());
+        bstream.WriteUInt32ASCII(ifs.GetNNormal());
+        bstream.WriteUInt32ASCII(ifs.GetNColor());
+        bstream.WriteUInt32ASCII(ifs.GetNTexCoord());
+        bstream.WriteUInt32ASCII(ifs.GetNumFloatAttributes());
+        bstream.WriteUInt32ASCII(ifs.GetNumIntAttributes());
 
         if (ifs.GetNCoord() > 0)
         {
-            bstream.WriteUInt32(ifs.GetNCoordIndex());
-             for(int j=0 ; j<3 ; ++j)
+            bstream.WriteUInt32ASCII(ifs.GetNCoordIndex());
+            for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32((float) ifs.GetCoordMin(j));
-                bstream.WriteFloat32((float) ifs.GetCoordMax(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetCoordMin(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetCoordMax(j));
             }            
-            bstream.WriteUChar8((unsigned char) params.GetCoordQuantBits());
+            bstream.WriteUCharASCII((unsigned char) params.GetCoordQuantBits());
         }
         if (ifs.GetNNormal() > 0)
         {
-            bstream.WriteUInt32(0);
+            bstream.WriteUInt32ASCII(0);
              for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32((float) ifs.GetNormalMin(j));
-                bstream.WriteFloat32((float) ifs.GetNormalMax(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetNormalMin(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetNormalMax(j));
             }
-            bstream.WriteUChar8(true); //(unsigned char) ifs.GetNormalPerVertex()
-            bstream.WriteUChar8((unsigned char) params.GetNormalQuantBits());
+            bstream.WriteUCharASCII(true); //(unsigned char) ifs.GetNormalPerVertex()
+            bstream.WriteUCharASCII((unsigned char) params.GetNormalQuantBits());
         }
         if (ifs.GetNColor() > 0)
         {
-            bstream.WriteUInt32(0);
+            bstream.WriteUInt32ASCII(0);
              for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32((float) ifs.GetColorMin(j));
-                bstream.WriteFloat32((float) ifs.GetColorMax(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetColorMin(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetColorMax(j));
             }
-            bstream.WriteUChar8(true); // (unsigned char) ifs.GetColorPerVertex()
-            bstream.WriteUChar8((unsigned char) params.GetColorQuantBits());
+            bstream.WriteUCharASCII(true); // (unsigned char) ifs.GetColorPerVertex()
+            bstream.WriteUCharASCII((unsigned char) params.GetColorQuantBits());
         }
         if (ifs.GetNTexCoord() > 0)
         {
-            bstream.WriteUInt32(0);
+            bstream.WriteUInt32ASCII(0);
              for(int j=0 ; j<2 ; ++j)
             {
-                bstream.WriteFloat32((float) ifs.GetTexCoordMin(j));
-                bstream.WriteFloat32((float) ifs.GetTexCoordMax(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetTexCoordMin(j));
+                bstream.WriteFloat32ASCII((float) ifs.GetTexCoordMax(j));
             }
-            bstream.WriteUChar8((unsigned char) params.GetTexCoordQuantBits());
+            bstream.WriteUCharASCII((unsigned char) params.GetTexCoordQuantBits());
         }
         for(unsigned long a = 0; a < ifs.GetNumFloatAttributes(); ++a)
         {
-            bstream.WriteUInt32(ifs.GetNFloatAttribute(a));
+            bstream.WriteUInt32ASCII(ifs.GetNFloatAttribute(a));
             if (ifs.GetNFloatAttribute(a) > 0)
             {
                 assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
-                bstream.WriteUInt32(0);
+                bstream.WriteUInt32ASCII(0);
                 unsigned char d = (unsigned char) ifs.GetFloatAttributeDim(a);
-                bstream.WriteUChar8(d);
+                bstream.WriteUCharASCII(d);
                 for(unsigned char j = 0 ; j < d ; ++j)
                 {
-                    bstream.WriteFloat32((float) ifs.GetFloatAttributeMin(a, j));
-                    bstream.WriteFloat32((float) ifs.GetFloatAttributeMax(a, j));
+                    bstream.WriteFloat32ASCII((float) ifs.GetFloatAttributeMin(a, j));
+                    bstream.WriteFloat32ASCII((float) ifs.GetFloatAttributeMax(a, j));
                 }
-                bstream.WriteUChar8(true); //(unsigned char) ifs.GetFloatAttributePerVertex(a)
-                bstream.WriteUChar8((unsigned char) params.GetFloatAttributeQuantBits(a));
+                bstream.WriteUCharASCII(true); //(unsigned char) ifs.GetFloatAttributePerVertex(a)
+                bstream.WriteUCharASCII((unsigned char) params.GetFloatAttributeQuantBits(a));
             }
         }
         for(unsigned long a = 0; a < ifs.GetNumIntAttributes(); ++a)
         {
-            bstream.WriteUInt32(ifs.GetNIntAttribute(a));
+            bstream.WriteUInt32ASCII(ifs.GetNIntAttribute(a));
             if (ifs.GetNIntAttribute(a) > 0)
             {
                 assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
-                bstream.WriteUInt32(0);
-                bstream.WriteUChar8((unsigned char) ifs.GetIntAttributeDim(a));
-                bstream.WriteUChar8(true); // (unsigned char) ifs.GetIntAttributePerVertex(a)
+                bstream.WriteUInt32ASCII(0);
+                bstream.WriteUCharASCII((unsigned char) ifs.GetIntAttributeDim(a));
+                bstream.WriteUCharASCII(true); // (unsigned char) ifs.GetIntAttributePerVertex(a)
             }
         }    
         return X3DGC_OK;
@@ -182,39 +186,6 @@ namespace x3dgc
         }
         return X3DGC_OK;
     }
-    inline X3DGCErrorCode SC3DMCEncoder::EncodePredicionResidual(long predResidual, 
-                                                                 BinaryStream & bstream, 
-                                                                 bool predicted)
-    {
-        if (predicted)
-        {
-            if (predResidual < 0)
-            {
-                predResidual = 1-2*predResidual;
-            }
-            else
-            {
-                predResidual *= 2;
-            }
-        }
-        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-            predResidual >= X3DGC_RESIDUAL_THRESHOLD)
-        {
-            bstream.WriteUChar8(X3DGC_RESIDUAL_THRESHOLD);
-            predResidual -= X3DGC_RESIDUAL_THRESHOLD;
-            const long mask = X3DGC_RESIDUAL_THRESHOLD;
-            for(long h = 0; h < X3DGC_RESIDUAL_MAX_BITS; h+=X3DGC_RESIDUAL_BITS)
-            {
-                bstream.WriteUChar8((unsigned char) (predResidual & mask));
-                predResidual >>= X3DGC_RESIDUAL_BITS;
-            }
-        }
-        else
-        {
-            bstream.WriteUChar8((unsigned char) predResidual);
-        }
-        return X3DGC_OK;
-    }
     X3DGCErrorCode SC3DMCEncoder::EncodeFloatArray(const Real * const floatArray, 
                                                    unsigned long numFloatArraySize,
                                                    unsigned long dimFloatArraySize,
@@ -237,10 +208,16 @@ namespace x3dgc
         long predResidual;        
         const long nvert = (long) numFloatArraySize;
 
-        unsigned long start = bstream.GetSize();        
-        bstream.WriteUInt32(0); 
+        unsigned long start = bstream.GetSize();
+        bstream.WriteUInt32ASCII(0); 
 
         QuantizeFloatArray(floatArray, numFloatArraySize, dimFloatArraySize, minFloatArray, maxFloatArray, nQBits);
+
+#ifdef DEBUG_VERBOSE
+        printf("FloatArray (%i, %i)\n", numFloatArraySize, dimFloatArraySize);
+        fprintf(g_fileDebugEnc, "FloatArray (%i, %i)\n", numFloatArraySize, dimFloatArraySize);
+#endif //DEBUG_VERBOSE
+        
         for (long vm=0; vm < nvert; ++vm) 
         {
             v = invVMap[vm];
@@ -274,7 +251,7 @@ namespace x3dgc
                             a = triangles[ta*3 + 0];
                             b = triangles[ta*3 + 2];
                         }
-                        else if (triangles[ta*3 + 2] == v)
+                        else
                         {
                             a = triangles[ta*3 + 0];
                             b = triangles[ta*3 + 1];
@@ -337,7 +314,11 @@ namespace x3dgc
                 for (unsigned long i = 0; i < dimFloatArraySize; i++) 
                 {
                     predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - (tpred[i] + nt/2) / nt;
-                    EncodePredicionResidual(predResidual, bstream, true);
+                    bstream.WriteIntASCII(predResidual);
+#ifdef DEBUG_VERBOSE
+                    printf("%i\n", predResidual);
+                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+#endif //DEBUG_VERBOSE
                 }
             }
             else if (nv > 0)
@@ -345,7 +326,24 @@ namespace x3dgc
                 for (unsigned long i = 0; i < dimFloatArraySize; i++) 
                 {
                     predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - (vpred[i] + nv/2) / nv ;
-                    EncodePredicionResidual(predResidual, bstream, true);
+                    bstream.WriteIntASCII(predResidual);
+#ifdef DEBUG_VERBOSE
+                    printf("%i\n", predResidual);
+                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+#endif //DEBUG_VERBOSE
+                }
+            }
+            else if ( vm > 0)
+            {
+                long prev = invVMap[vm-1];
+                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                {
+                    predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - m_quantFloatArray[prev*dimFloatArraySize+i];
+                    bstream.WriteIntASCII(predResidual);
+#ifdef DEBUG_VERBOSE
+                    printf("%i\n", predResidual);
+                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+#endif //DEBUG_VERBOSE
                 }
             }
             else
@@ -353,11 +351,19 @@ namespace x3dgc
                 for (unsigned long i = 0; i < dimFloatArraySize; i++) 
                 {
                     predResidual = m_quantFloatArray[v*dimFloatArraySize+i];
-                    EncodePredicionResidual(predResidual, bstream, false);
+                    bstream.WriteIntASCII(predResidual);
+#ifdef DEBUG_VERBOSE
+                    printf("%i\n", predResidual);
+                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+#endif //DEBUG_VERBOSE
                 }
             }
         }
-        bstream.WriteUInt32(start, bstream.GetSize() - start);
+        bstream.WriteUInt32ASCII(start, bstream.GetSize() - start);
+#ifdef DEBUG_VERBOSE
+                    printf("Size %i\n", bstream.GetSize() - start);
+                    fprintf(g_fileDebugEnc,"Size %i\n", bstream.GetSize() - start);
+#endif //DEBUG_VERBOSE
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodeIntArray(const long * const intArray, 
@@ -367,7 +373,7 @@ namespace x3dgc
     {
         const long * const invVMap   = m_triangleListEncoder.GetInvVMap();
         unsigned long start = bstream.GetSize();
-        bstream.WriteUInt32(0); 
+        bstream.WriteUInt32ASCII(0); 
         long v;
         for (unsigned long vm=0; vm < numIntArraySize; ++vm) 
         {
@@ -375,18 +381,21 @@ namespace x3dgc
             assert( v >= 0 && v < (long) numIntArraySize);
             for (unsigned long i = 0; i < dimIntArraySize; i++) 
             {
-                assert( intArray[v*dimIntArraySize+i] < (1<<X3DGC_RESIDUAL_MAX_BITS) &&
-                        intArray[v*dimIntArraySize+i] >= 0);
-                EncodePredicionResidual(intArray[v*dimIntArraySize+i], bstream, false);
+                bstream.WriteUIntASCII(intArray[v*dimIntArraySize+i]);
             }
         }
-        bstream.WriteUInt32(start, bstream.GetSize() - start);
+        bstream.WriteUInt32ASCII(start, bstream.GetSize() - start);
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodePayload(const SC3DMCEncodeParams & params, 
                                                 const IndexedFaceSet & ifs, 
                                                 BinaryStream & bstream)
     {
+
+#ifdef DEBUG_VERBOSE
+        g_fileDebugEnc = fopen("tfans_enc_main.txt", "w");
+#endif //DEBUG_VERBOSE
+
         m_binarization = params.GetBinarization();
         // encode triangle list        
         m_triangleListEncoder.SetBinarization(params.GetBinarization());
@@ -425,6 +434,11 @@ namespace x3dgc
         {
             EncodeIntArray(ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), bstream);
         }
+
+#ifdef DEBUG_VERBOSE
+        fflush(g_fileDebugEnc);
+        fclose(g_fileDebugEnc);
+#endif //DEBUG_VERBOSE
         return X3DGC_OK;
     }
 }

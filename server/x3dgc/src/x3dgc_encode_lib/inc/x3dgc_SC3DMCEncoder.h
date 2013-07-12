@@ -80,9 +80,6 @@ namespace x3dgc
                                                    unsigned long numIntArraySize,
                                                    unsigned long dimIntArraySize,
                                                    BinaryStream & bstream);
-        X3DGCErrorCode              EncodePredicionResidual(long predResidual, 
-                                                            BinaryStream & bstream, 
-                                                            bool predicted);        
         TriangleListEncoder         m_triangleListEncoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;

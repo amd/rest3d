@@ -30,7 +30,14 @@ THE SOFTWARE.
 
 namespace x3dgc
 {
-    const unsigned long X3DGC_BINARY_STREAM_DEFAULT_SIZE = 4096;
+    const unsigned long X3DGC_BINARY_STREAM_DEFAULT_SIZE       = 4096;
+    const unsigned long X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0   = 7;
+    const unsigned long X3DGC_BINARY_STREAM_MAX_SYMBOL0        = (1 << X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0) - 1;
+    const unsigned long X3DGC_BINARY_STREAM_BITS_PER_SYMBOL1   = 6;
+    const unsigned long X3DGC_BINARY_STREAM_MAX_SYMBOL1        = (1 << X3DGC_BINARY_STREAM_BITS_PER_SYMBOL1) - 1;
+    const unsigned long X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32 = (32+X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0-1) / 
+                                                                 X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0;
+
     //! 
     class BinaryStream
     {
@@ -43,117 +50,114 @@ namespace x3dgc
                                 };
         //! Destructor.
                                 ~BinaryStream(void){};
-        void                    WriteFloat32(unsigned long position, float value) 
-                                {
-                                    assert(position < m_stream.GetSize() - 4);
-                                    unsigned char * ptr = (unsigned char *) (&value);
-                                    if (m_endianness == X3DGC_BIG_ENDIAN)
-                                    {
-                                        m_stream[position++] = ptr[3];
-                                        m_stream[position++] = ptr[2];
-                                        m_stream[position++] = ptr[1];
-                                        m_stream[position  ] = ptr[0];
-                                    }
-                                    else
-                                    {
-                                        m_stream[position++] = (*(ptr+0));
-                                        m_stream[position++] = (*(ptr+1));
-                                        m_stream[position++] = (*(ptr+2));
-                                        m_stream[position  ] = (*(ptr+3));
-                                    }
-                                }
 
-        void                    WriteFloat32(float value) 
+        void                    WriteFloat32ASCII(float value) 
                                 {
-                                    unsigned char * ptr = (unsigned char *) (&value);
-                                    if (m_endianness == X3DGC_BIG_ENDIAN)
+                                    unsigned long uiValue = *((unsigned long *)(&value));
+                                    WriteUInt32ASCII(uiValue);
+                                }
+        void                    WriteUInt32ASCII(unsigned long position, unsigned long value) 
+                                {
+                                    assert(position < m_stream.GetSize() - X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32);
+                                    for(unsigned long i = 0; i < X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32; ++i)
                                     {
-                                        m_stream.PushBack(ptr[3]);
-                                        m_stream.PushBack(ptr[2]);
-                                        m_stream.PushBack(ptr[1]);
-                                        m_stream.PushBack(ptr[0]);
+                                        m_stream[position++] = value & X3DGC_BINARY_STREAM_MAX_SYMBOL0;
+                                        value >>= X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0;
+                                    }
+                                }
+        void                    WriteUInt32ASCII(unsigned long value) 
+                                {
+                                    for(long i = 0; i < X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32; ++i)
+                                    {
+                                        m_stream.PushBack(value & X3DGC_BINARY_STREAM_MAX_SYMBOL0);
+                                        value >>= X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0;
+                                    }
+                                }
+        void                    WriteIntASCII(long value) 
+                                {
+                                    unsigned int uiValue;
+                                    if (value < 0)
+                                    {
+                                        uiValue = (unsigned long) (1 - (2 * value));
                                     }
                                     else
                                     {
-                                        m_stream.PushBack(ptr[0]);
-                                        m_stream.PushBack(ptr[1]);
-                                        m_stream.PushBack(ptr[2]);
-                                        m_stream.PushBack(ptr[3]);
+                                        uiValue = (unsigned long) (2 * value);
                                     }
+                                    WriteUIntASCII(uiValue);
                                 }
-        void                    WriteUInt32(unsigned long position, unsigned long value) 
+        void                    WriteUIntASCII(unsigned long value) 
                                 {
-                                    assert(position < m_stream.GetSize() - 4);
-                                    unsigned char * ptr = (unsigned char *) (&value);
-                                    if (m_endianness == X3DGC_BIG_ENDIAN)
+                                    if (value >= X3DGC_BINARY_STREAM_MAX_SYMBOL0)
                                     {
-                                        m_stream[position++] = ptr[3];
-                                        m_stream[position++] = ptr[2];
-                                        m_stream[position++] = ptr[1];
-                                        m_stream[position  ] = ptr[0];
+                                        m_stream.PushBack(X3DGC_BINARY_STREAM_MAX_SYMBOL0);
+                                        value -= X3DGC_BINARY_STREAM_MAX_SYMBOL0;
+                                        unsigned char a, b;
+                                        do
+                                        {
+                                            a  = ((value & X3DGC_BINARY_STREAM_MAX_SYMBOL1) << 1);
+                                            b  = ( (value >>= X3DGC_BINARY_STREAM_BITS_PER_SYMBOL1) > 0);
+                                            a += b;
+                                            m_stream.PushBack(a);
+                                        } while (b);
                                     }
                                     else
                                     {
-                                        m_stream[position++] = ptr[0];
-                                        m_stream[position++] = ptr[1];
-                                        m_stream[position++] = ptr[2];
-                                        m_stream[position  ] = ptr[3];
+                                        m_stream.PushBack((unsigned char) value);
                                     }
                                 }
-
-        void                    WriteUInt32(unsigned long value) 
+        void                    WriteUCharASCII(unsigned char value) 
                                 {
-                                    unsigned char * ptr = (unsigned char *) (&value);
-                                    if (m_endianness == X3DGC_BIG_ENDIAN)
-                                    {
-                                        m_stream.PushBack(ptr[3]);
-                                        m_stream.PushBack(ptr[2]);
-                                        m_stream.PushBack(ptr[1]);
-                                        m_stream.PushBack(ptr[0]);
-                                    }
-                                    else
-                                    {
-                                        m_stream.PushBack(ptr[0]);
-                                        m_stream.PushBack(ptr[1]);
-                                        m_stream.PushBack(ptr[2]);
-                                        m_stream.PushBack(ptr[3]);
-                                    }
-                                }
-        void                    WriteUChar8(unsigned int position, unsigned char value) 
-                                {
-                                    m_stream[position] = value;
-                                }
-        void                    WriteUChar8(unsigned char value) 
-                                {
+                                    assert(value <= X3DGC_BINARY_STREAM_MAX_SYMBOL0);
                                     m_stream.PushBack(value);
                                 }
-        float                   ReadFloat32(unsigned long & position) const
+        float                   ReadFloat32ASCII(unsigned long & position) const
                                 {
-                                    unsigned long value = ReadUInt32(position);
+                                    unsigned long value = ReadUInt32ASCII(position);
                                     float fvalue = *((float *)(&value));
                                     return fvalue;
                                 }
-        unsigned long           ReadUInt32(unsigned long & position)  const
+        unsigned long           ReadUInt32ASCII(unsigned long & position)  const
                                 {
-                                    assert(position < m_stream.GetSize() - 4);
+                                    assert(position < m_stream.GetSize() - X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32);
                                     unsigned long value = 0;
-                                    if (m_endianness == X3DGC_BIG_ENDIAN)
+                                    unsigned long shift = 0;
+                                    for(long i = 0; i < X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32; ++i)
                                     {
-                                        value += (m_stream[position++]<<24);
-                                        value += (m_stream[position++]<<16);
-                                        value += (m_stream[position++]<<8);
-                                        value += (m_stream[position++]);
+                                        value  += (m_stream[position++] << shift);
+                                        shift  += X3DGC_BINARY_STREAM_BITS_PER_SYMBOL0;
+                                    }                                    
+                                    return value;
+                                }
+        long                    ReadIntASCII(unsigned long & position) const
+                                {
+                                    unsigned long uiValue = ReadUIntASCII(position);
+                                    if (uiValue & 1)
+                                    {
+                                        return -((long) (uiValue >> 1));
                                     }
                                     else
                                     {
-                                        value += (m_stream[position++]);
-                                        value += (m_stream[position++]<<8);
-                                        value += (m_stream[position++]<<16);
-                                        value += (m_stream[position++]<<24);
+                                        return ((long) (uiValue >> 1));
+                                    }
+                                }
+        unsigned long           ReadUIntASCII(unsigned long & position) const
+                                {
+                                    unsigned long value = m_stream[position++];
+                                    if (value == X3DGC_BINARY_STREAM_MAX_SYMBOL0)
+                                    {
+                                        long x;
+                                        unsigned long i = 0;
+                                        do
+                                        {
+                                            x = m_stream[position++];
+                                            value += ( (x>>1) << i);
+                                            i += X3DGC_BINARY_STREAM_BITS_PER_SYMBOL1;
+                                        } while (x & 1);
                                     }
                                     return value;
                                 }
-        unsigned char           ReadUChar8(unsigned long & position) const
+        unsigned char           ReadUCharASCII(unsigned long & position) const
                                 {
                                     return m_stream[position++];
                                 }
@@ -168,7 +172,7 @@ namespace x3dgc
                                     fclose(fout);
                                     return X3DGC_OK;
                                 }
-        X3DGCErrorCode            Load(const char * const fileName) 
+        X3DGCErrorCode          Load(const char * const fileName) 
                                 {
                                     FILE * fin = fopen(fileName, "rb");
                                     if (!fin)

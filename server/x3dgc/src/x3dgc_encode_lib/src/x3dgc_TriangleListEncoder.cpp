@@ -295,7 +295,7 @@ namespace x3dgc
 #endif //DEBUG_VERBOSE
 
         Init(triangles, numTriangles, numVertices);
-        bstream.WriteUInt32(m_maxSizeVertexToTriangle);
+        bstream.WriteUInt32ASCII(m_maxSizeVertexToTriangle);
 
         long v0;
         for (long v = 0; v < m_numVertices; v++)

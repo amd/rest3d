@@ -74,9 +74,6 @@ namespace x3dgc
                                                        const Real * const minfloatArray,
                                                        const Real * const maxfloatArray,
                                                        unsigned long nQBits);
-        X3DGCErrorCode              DecodePredicionResidual(long & predResidual,
-                                                            const BinaryStream & bstream,
-                                                            bool predicted);
         X3DGCErrorCode              DecodeIntArray(long * const intArray, 
                                                    unsigned long numIntArraySize,
                                                    unsigned long dimIntArraySize,

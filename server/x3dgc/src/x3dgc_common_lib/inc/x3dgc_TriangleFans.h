@@ -35,22 +35,6 @@ namespace x3dgc
     const long X3DGC_TFANS_MIN_SIZE_ALLOCATED_VERTICES_BUFFER = 128;
     const long X3DGC_TFANS_MIN_SIZE_TFAN_SIZE_BUFFER          = 8;
 
-    const long X3DGC_NUM_TFANS_SIZE_THRESHOLD                 = 15;
-    const long X3DGC_NUM_TFANS_SIZE_BITS                      = 4; 
-    const long X3DGC_NUM_TFANS_SIZE_MAX_BITS                  = 8; 
-    
-    const long X3DGC_TFAN_DEGREE_THRESHOLD                    = 15;
-    const long X3DGC_TFAN_DEGREE_BITS                         = 4;
-    const long X3DGC_TFAN_DEGREE_MAX_BITS                     = 16;
-
-    const long X3DGC_TFAN_INDEX_THRESHOLD                    = 255;
-    const long X3DGC_TFAN_INDEX_BITS                         = 8;
-    const long X3DGC_TFAN_INDEX_MAX_BITS                     = 24;
-
-    const long X3DGC_RESIDUAL_THRESHOLD                      = 255;
-    const long X3DGC_RESIDUAL_BITS                           = 8;
-    const long X3DGC_RESIDUAL_MAX_BITS                       = 16;
-
     class CompressedTriangleFans
     {
     public:    
@@ -77,73 +61,23 @@ namespace x3dgc
                                     }
         X3DGCErrorCode              PushNumTFans(long numTFans)
                                     {
-                                        assert(numTFans < (1<<X3DGC_NUM_TFANS_SIZE_MAX_BITS) + X3DGC_NUM_TFANS_SIZE_THRESHOLD);
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            numTFans >= X3DGC_NUM_TFANS_SIZE_THRESHOLD)
-                                        {
-                                            m_numTFANs.PushBack(X3DGC_NUM_TFANS_SIZE_THRESHOLD);
-                                            numTFans -= X3DGC_NUM_TFANS_SIZE_THRESHOLD;
-                                            const long mask = X3DGC_NUM_TFANS_SIZE_THRESHOLD;
-                                            for(long h = 0; h < X3DGC_NUM_TFANS_SIZE_MAX_BITS; h+=X3DGC_NUM_TFANS_SIZE_BITS)
-                                            {
-                                                m_numTFANs.PushBack( numTFans & mask);
-                                                numTFans >>= X3DGC_NUM_TFANS_SIZE_BITS;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            m_numTFANs.PushBack(numTFans);
-                                        }
+                                         m_numTFANs.PushBack(numTFans);
                                         return X3DGC_OK;
                                     }
         long                        ReadNumTFans(unsigned long & iterator) const
                                     {
                                         assert(iterator < m_numTFANs.GetSize());
-                                        long numTFans = m_numTFANs[iterator++];
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            numTFans == X3DGC_NUM_TFANS_SIZE_THRESHOLD)
-                                        {
-                                            for(long h = 0; h < X3DGC_NUM_TFANS_SIZE_MAX_BITS; h+=X3DGC_NUM_TFANS_SIZE_BITS)
-                                            {
-                                                numTFans += (m_numTFANs[iterator++] << h);
-                                            }
-                                        }
-                                        return numTFans;
+                                        return m_numTFANs[iterator++];
                                     }
         X3DGCErrorCode              PushDegree(long degree)
                                     {
-                                        assert(degree < (1<<X3DGC_TFAN_DEGREE_MAX_BITS) + X3DGC_TFAN_DEGREE_THRESHOLD);
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            degree >= X3DGC_TFAN_DEGREE_THRESHOLD)
-                                        {
-                                            m_degrees.PushBack(X3DGC_TFAN_DEGREE_THRESHOLD);
-                                            degree -= X3DGC_TFAN_DEGREE_THRESHOLD;
-                                            const long mask  = X3DGC_TFAN_DEGREE_THRESHOLD;
-                                            for(long h = 0; h < X3DGC_TFAN_DEGREE_MAX_BITS; h+=X3DGC_TFAN_DEGREE_BITS)
-                                            {
-                                                m_degrees.PushBack( degree & mask);
-                                                degree >>= X3DGC_TFAN_DEGREE_BITS;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            m_degrees.PushBack(degree);
-                                        }
+                                        m_degrees.PushBack(degree);
                                         return X3DGC_OK;
                                     }
         long                        ReadDegree(unsigned long & iterator) const
                                     {
                                         assert(iterator < m_degrees.GetSize());
-                                        long degree = m_degrees[iterator++];
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            degree == X3DGC_TFAN_DEGREE_THRESHOLD)
-                                        {
-                                            for(long h = 0; h < X3DGC_TFAN_DEGREE_MAX_BITS; h+=X3DGC_TFAN_DEGREE_BITS)
-                                            {
-                                                degree += (m_degrees[iterator++] << h);
-                                            }
-                                        }
-                                        return degree;
+                                        return m_degrees[iterator++];
                                     }
         X3DGCErrorCode              PushConfig(long config)
                                     {
@@ -152,6 +86,7 @@ namespace x3dgc
                                     }
         long                        ReadConfig(unsigned long & iterator) const
                                     {
+                                        assert(iterator < m_configs.GetSize());
                                         return m_configs[iterator++];
                                     }
         X3DGCErrorCode              PushOperation(long op)
@@ -161,57 +96,18 @@ namespace x3dgc
                                     }
         long                        ReadOperation(unsigned long & iterator) const
                                     {
+                                        assert(iterator < m_operations.GetSize());
                                         return m_operations[iterator++];
                                     }
         X3DGCErrorCode              PushIndex(long index)
                                     {
-                                        if (index < 0)
-                                        {
-                                            index = 1-2*index;
-                                        }
-                                        else
-                                        {
-                                            index *= 2;
-                                        }
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            index >= X3DGC_TFAN_INDEX_THRESHOLD)
-                                        {
-                                            m_indices.PushBack(X3DGC_TFAN_INDEX_THRESHOLD);
-                                            index -= X3DGC_TFAN_INDEX_THRESHOLD;
-                                            const long mask  = X3DGC_TFAN_INDEX_THRESHOLD;
-                                            for(long h = 0; h < X3DGC_TFAN_INDEX_MAX_BITS; h+=X3DGC_TFAN_INDEX_BITS)
-                                            {
-                                                m_indices.PushBack( index & mask);
-                                                index >>= X3DGC_TFAN_INDEX_BITS;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            m_indices.PushBack(index);
-                                        }
+                                        m_indices.PushBack(index);
                                         return X3DGC_OK;
                                     }
         long                        ReadIndex(unsigned long & iterator) const
                                     {
                                         assert(iterator < m_indices.GetSize());
-                                        long index = m_indices[iterator++];
-                                        if (m_binarization == X3DGC_SC3DMC_GZIP &&
-                                            index == X3DGC_TFAN_INDEX_THRESHOLD)
-                                        {
-                                            for(long h = 0; h < X3DGC_TFAN_INDEX_MAX_BITS; h+=X3DGC_TFAN_INDEX_BITS)
-                                            {
-                                                index += (m_indices[iterator++] << h);
-                                            }
-                                        }
-                                        if (index & 1)
-                                        {
-                                            index = - (index>>1);
-                                        }
-                                        else
-                                        {
-                                            index >>= 1;
-                                        }
-                                        return index;
+                                        return m_indices[iterator++];
                                     }
         X3DGCErrorCode              Clear()
                                     {
