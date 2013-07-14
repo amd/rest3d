@@ -59,8 +59,8 @@ namespace x3dgc
         //! Destructor.
                                     ~TriangleListDecoder(void){};
 
-        X3DGCSC3DMCBinarization     GetBinarization() const { return m_binarization; }
-        void                        SetBinarization(X3DGCSC3DMCBinarization binarization) { m_binarization = binarization; }
+        X3DGCSC3DMCStreamType     GetStreamType() const { return m_streamType; }
+        void                        SetStreamType(X3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
         const AdjacencyInfo &       GetVertexToTriangle() const { return m_vertexToTriangle;}
         X3DGCErrorCode              Decode(long * const triangles,
                                            const long numTriangles,
@@ -68,9 +68,10 @@ namespace x3dgc
                                            const BinaryStream & bstream,
                                            unsigned long & iterator)
                                     {
-                                        unsigned long maxSizeV2T = bstream.ReadUInt32ASCII(iterator);
+                                        unsigned char compressionMask = bstream.ReadUChar(iterator, m_streamType); // vertex/triangles orders not preserved
+                                        unsigned long maxSizeV2T = bstream.ReadUInt32(iterator, m_streamType);
                                         Init(triangles, numTriangles, numVertices, maxSizeV2T);
-                                        m_ctfans.Load(bstream, iterator);
+                                        m_ctfans.Load(bstream, iterator, m_streamType);
                                         Decompress();
                                         return X3DGC_OK;
                                     }
@@ -103,7 +104,7 @@ namespace x3dgc
         AdjacencyInfo               m_vertexToTriangle;
         CompressedTriangleFans      m_ctfans;
         TriangleFans                m_tfans;
-        X3DGCSC3DMCBinarization     m_binarization;
+        X3DGCSC3DMCStreamType       m_streamType;
     };
 }
 #endif // X3DGC_TRIANGLE_LIST_DECODER_H

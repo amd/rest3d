@@ -188,7 +188,7 @@ namespace x3dgc
         m_numVertices             = 0;
         m_triangles               = 0;
         m_maxSizeVertexToTriangle = 0;
-        m_binarization            = X3DGC_SC3DMC_UNKOWN;
+        m_streamType            = X3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
     }
     TriangleListEncoder::~TriangleListEncoder()
     {
@@ -252,7 +252,7 @@ namespace x3dgc
         memset(m_tmap   , 0xFF, sizeof(long) * m_numTriangles);
 
         m_vfifo.Allocate(m_numVertices);
-        m_ctfans.SetBinarization(m_binarization);
+        m_ctfans.SetStreamType(m_streamType);
         m_ctfans.Allocate(m_numVertices);
 
         // compute vertex-to-triangle adjacency information
@@ -295,7 +295,8 @@ namespace x3dgc
 #endif //DEBUG_VERBOSE
 
         Init(triangles, numTriangles, numVertices);
-        bstream.WriteUInt32ASCII(m_maxSizeVertexToTriangle);
+        bstream.WriteUChar(0, m_streamType); // vertex/triangles orders not preserved
+        bstream.WriteUInt32(m_maxSizeVertexToTriangle, m_streamType);
 
         long v0;
         for (long v = 0; v < m_numVertices; v++)
@@ -316,7 +317,7 @@ namespace x3dgc
 #ifdef DEBUG_VERBOSE
         fclose(g_fileDebugEncTL);
 #endif //DEBUG_VERBOSE
-        m_ctfans.Save(bstream);
+        m_ctfans.Save(bstream, m_streamType);
         return X3DGC_OK;
     }
     X3DGCErrorCode TriangleListEncoder::CompueLocalConnectivityInfo(const long focusVertex)

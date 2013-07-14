@@ -76,7 +76,7 @@ bool SaveOBJ(const char * fileName,
 
 bool GenerateRandomFloatVector(std::vector< Real > & tab, size_t size, Real scale);
 bool GenerateRandomIntVector  (std::vector< long > & tab, size_t size);
-int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnormal)
+int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnormal, X3DGCSC3DMCStreamType streamType)
 {
     std::string folder;
     long found = fileName.find_last_of(PATH_SEP);
@@ -104,13 +104,14 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
         std::cout << "Error: LoadOBJ()\n" << std::endl;
         return -1;
     }
-
+/*
     ret = SaveOBJ("debug_mesh.obj", points, texCoords, normals, triangles);
     if (!ret)
     {
         std::cout << "Error: SaveOBJ()\n" << std::endl;
         return -1;
     }
+*/
     if (points.size() == 0 || triangles.size() == 0)
     {
         std::cout <<  "Error: points.size() == 0 || triangles.size() == 0 \n" << std::endl;
@@ -118,6 +119,7 @@ int testEncode(const std::string fileName, int qcoord, int qtexCoord, int qnorma
     }
 
     SC3DMCEncodeParams params;
+    params.SetStreamType(streamType);
     IndexedFaceSet ifs;
     params.SetCoordQuantBits(qcoord);
     params.SetNormalQuantBits(qnormal);
@@ -280,8 +282,6 @@ int testDecode(std::string fileName)
         std::cout << "Error: SaveOBJ()\n" << std::endl;
         return -1;
     }
-
-
     return 0;
 }
 
@@ -299,6 +299,7 @@ int main(int argc, char * argv[])
     int qcoord    = 12;
     int qtexCoord = 10;
     int qnormal   = 10;
+    X3DGCSC3DMCStreamType streamType = X3DGC_SC3DMC_STREAM_TYPE_BINARY;
     for(int i = 1; i < argc; ++i)
     {
         if ( !strcmp(argv[i], "-c"))
@@ -340,7 +341,18 @@ int main(int argc, char * argv[])
             {
                 qtexCoord = atoi(argv[i]);
             }
-        }        
+        }
+        else if ( !strcmp(argv[i], "-st"))
+        {
+            ++i;
+            if (i < argc)
+            {
+                if (!strcmp(argv[i], "ascii"))
+                {
+                    streamType = X3DGC_SC3DMC_STREAM_TYPE_ASCII;
+                }
+            }
+        }
     }
 
     if (inputFileName.size() == 0 || mode == UNKNOWN)
@@ -351,15 +363,25 @@ int main(int argc, char * argv[])
         std::cout << "\t -qc \t Quantization bits for positions (default=11, range = {8,...,15})"<< std::endl;
         std::cout << "\t -qn \t Quantization bits for normals (default=10, range = {8,...,15})"<< std::endl;
         std::cout << "\t -qt \t Quantization bits for texture coordinates (default=10, range = {8,...,15})"<< std::endl;
+        std::cout << "\t -st \t Stream type (default=Bin, range = {binary, ascii})"<< std::endl;
         std::cout << "Examples:"<< std::endl;
         std::cout << "\t Encode: test_x3dgc -c fileName.obj"<< std::endl;
         std::cout << "\t Decode: test_x3dgc -d fileName.s3d"<< std::endl;
         return -1;
     }
+
+    std::cout << "----------------------------------------"<< inputFileName << std::endl;
+    std::cout << "Encode Parameters "<< inputFileName << std::endl;
+    std::cout << "   Input           \t "<< inputFileName << std::endl;
+
     int ret;
     if (mode == ENCODE)
     {
-        ret = testEncode(inputFileName, qcoord, qtexCoord, qnormal);
+        std::cout << "   Coord Quant.    \t "<< qcoord << std::endl;
+        std::cout << "   Normal Quant.   \t "<< qnormal << std::endl;
+        std::cout << "   TexCoord Quant. \t "<< qtexCoord << std::endl;
+        std::cout << "   Stream Type     \t "<< ((streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)? "ASCII" : "Binary") << std::endl;
+        ret = testEncode(inputFileName, qcoord, qtexCoord, qnormal, streamType);
     }
     else
     {

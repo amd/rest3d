@@ -35,16 +35,16 @@ namespace x3dgc
 {
     typedef float Real;
 
-    const long X3DGC_MIN_LONG             = -2147483647;
-    const long X3DGC_MAX_LONG             = 2147483647;
-    const long X3DGC_MAX_UCHAR8           = 255;
-    const long X3DGC_MAX_TFAN_SIZE        = 256;
+    const long X3DGC_MIN_LONG      = -2147483647;
+    const long X3DGC_MAX_LONG      =  2147483647;
+    const long X3DGC_MAX_UCHAR8    = 255;
+    const long X3DGC_MAX_TFAN_SIZE = 256;
 
-    const unsigned long X3DGC_SC3DMC_START_CODE = 0x00001F1;
-    const unsigned long X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES                = 256;
-    const unsigned long X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES                 = 256;
-    const unsigned long X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES                = 8;
-    const unsigned long X3DGC_SC3DMC_MAX_DIM_INT_ATTRIBUTES                 = 8;    
+    const unsigned long X3DGC_SC3DMC_START_CODE               = 0x00001F1;
+    const unsigned long X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES = 256;
+    const unsigned long X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES   = 256;
+    const unsigned long X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES = 8;
+    const unsigned long X3DGC_SC3DMC_MAX_DIM_INT_ATTRIBUTES   = 8;
 
     enum X3DGCEndianness
     {
@@ -62,14 +62,21 @@ namespace x3dgc
     };
     enum X3DGCSC3DMCBinarization
     {
-        X3DGC_SC3DMC_UNKOWN = -1,
-//      X3DGC_SC3DMC_FL     = 0,            // Fixed Length (not supported)
-//      X3DGC_SC3DMC_BP     = 1,            // BPC (not supported)
-//      X3DGC_SC3DMC_FC     = 2,            // 4 bits Coding (not supported)
-//      X3DGC_SC3DMC_AC     = 3,            // Arithmetic Coding (not supported)
-        X3DGC_SC3DMC_AC_EGC = 4,            // AC/EGk coding (not supported)
-        X3DGC_SC3DMC_GZIP   = 5             // supported
+        X3DGC_SC3DMC_BINARIZATION_FL     = 0,            // Fixed Length (not supported)
+        X3DGC_SC3DMC_BINARIZATION_BP     = 1,            // BPC (not supported)
+        X3DGC_SC3DMC_BINARIZATION_FC     = 2,            // 4 bits Coding (not supported)
+        X3DGC_SC3DMC_BINARIZATION_AC     = 3,            // Arithmetic Coding (not supported)
+        X3DGC_SC3DMC_BINARIZATION_AC_EGC = 4,            // Arithmetic Coding & EGCk
+        X3DGC_SC3DMC_BINARIZATION_ASCII  = 5             // Arithmetic Coding & EGCk
     };
+    enum X3DGCSC3DMCStreamType
+    {
+        X3DGC_SC3DMC_STREAM_TYPE_UNKOWN = 0,
+        X3DGC_SC3DMC_STREAM_TYPE_ASCII  = 1,
+        X3DGC_SC3DMC_STREAM_TYPE_BINARY = 2
+    };
+
+
     enum X3DGCSC3DMCQuantizationMode
     {
         X3DGC_SC3DMC_DIAG_BB             = 0, // supported

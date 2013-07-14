@@ -21,13 +21,14 @@ THE SOFTWARE.
 */
 
 #include "x3dgc_SC3DMCEncoder.h"
+#include "x3dgc_ArithmeticCodec.h"
 
 //#define DEBUG_VERBOSE
 
 namespace x3dgc
 {
 #ifdef DEBUG_VERBOSE
-        FILE* g_fileDebugEnc = NULL;
+        FILE* g_fileDebugSC3DMCEnc = NULL;
 #endif //DEBUG_VERBOSE
 
     X3DGCErrorCode SC3DMCEncoder::Encode(const SC3DMCEncodeParams & params, 
@@ -39,18 +40,19 @@ namespace x3dgc
         EncodeHeader(params, ifs, bstream);
         // Encode payload
         EncodePayload(params, ifs, bstream);
-        bstream.WriteUInt32ASCII(X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32, bstream.GetSize() - start);
+        bstream.WriteUInt32(X3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32, bstream.GetSize() - start, m_streamType);
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodeHeader(const SC3DMCEncodeParams & params, 
-                                        const IndexedFaceSet & ifs, 
-                                        BinaryStream & bstream)
+                                               const IndexedFaceSet & ifs, 
+                                               BinaryStream & bstream)
     {
-        bstream.WriteUInt32ASCII(X3DGC_SC3DMC_START_CODE);
-        bstream.WriteUInt32ASCII(0); // to be filled later
+        m_streamType = params.GetStreamType();
+        bstream.WriteUInt32(X3DGC_SC3DMC_START_CODE, m_streamType);
+        bstream.WriteUInt32(0, m_streamType); // to be filled later
 
-        bstream.WriteUCharASCII(X3DGC_SC3DMC_TFAN);
-        bstream.WriteFloat32ASCII((float)ifs.GetCreaseAngle());
+        bstream.WriteUChar(X3DGC_SC3DMC_TFAN, m_streamType);
+        bstream.WriteFloat32((float)ifs.GetCreaseAngle(), m_streamType);
           
         unsigned char mask = 0;
         bool markerBit0 = false;
@@ -67,99 +69,99 @@ namespace x3dgc
         mask += (markerBit2                << 6);
         mask += (markerBit3                << 7);
 
-        bstream.WriteUCharASCII(mask);
+        bstream.WriteUChar(mask, m_streamType);
 
-        bstream.WriteUInt32ASCII(ifs.GetNCoord());
-        bstream.WriteUInt32ASCII(ifs.GetNNormal());
-        bstream.WriteUInt32ASCII(ifs.GetNColor());
-        bstream.WriteUInt32ASCII(ifs.GetNTexCoord());
-        bstream.WriteUInt32ASCII(ifs.GetNumFloatAttributes());
-        bstream.WriteUInt32ASCII(ifs.GetNumIntAttributes());
+        bstream.WriteUInt32(ifs.GetNCoord(), m_streamType);
+        bstream.WriteUInt32(ifs.GetNNormal(), m_streamType);
+        bstream.WriteUInt32(ifs.GetNColor(), m_streamType);
+        bstream.WriteUInt32(ifs.GetNTexCoord(), m_streamType);
+        bstream.WriteUInt32(ifs.GetNumFloatAttributes(), m_streamType);
+        bstream.WriteUInt32(ifs.GetNumIntAttributes(), m_streamType);
 
         if (ifs.GetNCoord() > 0)
         {
-            bstream.WriteUInt32ASCII(ifs.GetNCoordIndex());
+            bstream.WriteUInt32(ifs.GetNCoordIndex(), m_streamType);
             for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32ASCII((float) ifs.GetCoordMin(j));
-                bstream.WriteFloat32ASCII((float) ifs.GetCoordMax(j));
+                bstream.WriteFloat32((float) ifs.GetCoordMin(j), m_streamType);
+                bstream.WriteFloat32((float) ifs.GetCoordMax(j), m_streamType);
             }            
-            bstream.WriteUCharASCII((unsigned char) params.GetCoordQuantBits());
+            bstream.WriteUChar((unsigned char) params.GetCoordQuantBits(), m_streamType);
         }
         if (ifs.GetNNormal() > 0)
         {
-            bstream.WriteUInt32ASCII(0);
+            bstream.WriteUInt32(0, m_streamType);
              for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32ASCII((float) ifs.GetNormalMin(j));
-                bstream.WriteFloat32ASCII((float) ifs.GetNormalMax(j));
+                bstream.WriteFloat32((float) ifs.GetNormalMin(j), m_streamType);
+                bstream.WriteFloat32((float) ifs.GetNormalMax(j), m_streamType);
             }
-            bstream.WriteUCharASCII(true); //(unsigned char) ifs.GetNormalPerVertex()
-            bstream.WriteUCharASCII((unsigned char) params.GetNormalQuantBits());
+            bstream.WriteUChar(true, m_streamType); //(unsigned char) ifs.GetNormalPerVertex()
+            bstream.WriteUChar((unsigned char) params.GetNormalQuantBits(), m_streamType);
         }
         if (ifs.GetNColor() > 0)
         {
-            bstream.WriteUInt32ASCII(0);
+            bstream.WriteUInt32(0, m_streamType);
              for(int j=0 ; j<3 ; ++j)
             {
-                bstream.WriteFloat32ASCII((float) ifs.GetColorMin(j));
-                bstream.WriteFloat32ASCII((float) ifs.GetColorMax(j));
+                bstream.WriteFloat32((float) ifs.GetColorMin(j), m_streamType);
+                bstream.WriteFloat32((float) ifs.GetColorMax(j), m_streamType);
             }
-            bstream.WriteUCharASCII(true); // (unsigned char) ifs.GetColorPerVertex()
-            bstream.WriteUCharASCII((unsigned char) params.GetColorQuantBits());
+            bstream.WriteUChar(true, m_streamType); // (unsigned char) ifs.GetColorPerVertex()
+            bstream.WriteUChar((unsigned char) params.GetColorQuantBits(), m_streamType);
         }
         if (ifs.GetNTexCoord() > 0)
         {
-            bstream.WriteUInt32ASCII(0);
+            bstream.WriteUInt32(0, m_streamType);
              for(int j=0 ; j<2 ; ++j)
             {
-                bstream.WriteFloat32ASCII((float) ifs.GetTexCoordMin(j));
-                bstream.WriteFloat32ASCII((float) ifs.GetTexCoordMax(j));
+                bstream.WriteFloat32((float) ifs.GetTexCoordMin(j), m_streamType);
+                bstream.WriteFloat32((float) ifs.GetTexCoordMax(j), m_streamType);
             }
-            bstream.WriteUCharASCII((unsigned char) params.GetTexCoordQuantBits());
+            bstream.WriteUChar((unsigned char) params.GetTexCoordQuantBits(), m_streamType);
         }
         for(unsigned long a = 0; a < ifs.GetNumFloatAttributes(); ++a)
         {
-            bstream.WriteUInt32ASCII(ifs.GetNFloatAttribute(a));
+            bstream.WriteUInt32(ifs.GetNFloatAttribute(a), m_streamType);
             if (ifs.GetNFloatAttribute(a) > 0)
             {
                 assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
-                bstream.WriteUInt32ASCII(0);
+                bstream.WriteUInt32(0, m_streamType);
                 unsigned char d = (unsigned char) ifs.GetFloatAttributeDim(a);
-                bstream.WriteUCharASCII(d);
+                bstream.WriteUChar(d, m_streamType);
                 for(unsigned char j = 0 ; j < d ; ++j)
                 {
-                    bstream.WriteFloat32ASCII((float) ifs.GetFloatAttributeMin(a, j));
-                    bstream.WriteFloat32ASCII((float) ifs.GetFloatAttributeMax(a, j));
+                    bstream.WriteFloat32((float) ifs.GetFloatAttributeMin(a, j), m_streamType);
+                    bstream.WriteFloat32((float) ifs.GetFloatAttributeMax(a, j), m_streamType);
                 }
-                bstream.WriteUCharASCII(true); //(unsigned char) ifs.GetFloatAttributePerVertex(a)
-                bstream.WriteUCharASCII((unsigned char) params.GetFloatAttributeQuantBits(a));
+                bstream.WriteUChar(true, m_streamType); //(unsigned char) ifs.GetFloatAttributePerVertex(a)
+                bstream.WriteUChar((unsigned char) params.GetFloatAttributeQuantBits(a), m_streamType);
             }
         }
         for(unsigned long a = 0; a < ifs.GetNumIntAttributes(); ++a)
         {
-            bstream.WriteUInt32ASCII(ifs.GetNIntAttribute(a));
+            bstream.WriteUInt32(ifs.GetNIntAttribute(a), m_streamType);
             if (ifs.GetNIntAttribute(a) > 0)
             {
                 assert(ifs.GetFloatAttributeDim(a) < (unsigned long) X3DGC_MAX_UCHAR8);
-                bstream.WriteUInt32ASCII(0);
-                bstream.WriteUCharASCII((unsigned char) ifs.GetIntAttributeDim(a));
-                bstream.WriteUCharASCII(true); // (unsigned char) ifs.GetIntAttributePerVertex(a)
+                bstream.WriteUInt32(0, m_streamType);
+                bstream.WriteUChar((unsigned char) ifs.GetIntAttributeDim(a), m_streamType);
+                bstream.WriteUChar(true, m_streamType); // (unsigned char) ifs.GetIntAttributePerVertex(a)
             }
         }    
         return X3DGC_OK;
     }    
     X3DGCErrorCode SC3DMCEncoder::QuantizeFloatArray(const Real * const floatArray, 
-                                                   unsigned long numFloatArraySize,
-                                                   unsigned long dimFloatArraySize,
+                                                   unsigned long numFloatArray,
+                                                   unsigned long dimFloatArray,
                                                    const Real * const minFloatArray,
                                                    const Real * const maxFloatArray,
                                                    unsigned long nQBits)
     {
-        const unsigned long size = numFloatArraySize * dimFloatArraySize;
+        const unsigned long size = numFloatArray * dimFloatArray;
         Real delta[X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         Real r;
-        for(unsigned long d = 0; d < dimFloatArraySize; d++)
+        for(unsigned long d = 0; d < dimFloatArray; d++)
         {
             r = maxFloatArray[d] - minFloatArray[d];
             if (r > 0.0f)
@@ -177,18 +179,62 @@ namespace x3dgc
             m_quantFloatArraySize = size;
             m_quantFloatArray     = new long [size];
         }                                  
-        for(unsigned long v = 0; v < numFloatArraySize; ++v)
+        for(unsigned long v = 0; v < numFloatArray; ++v)
         {
-            for(unsigned long d = 0; d < dimFloatArraySize; ++d)
+            for(unsigned long d = 0; d < dimFloatArray; ++d)
             {
-                m_quantFloatArray[v * dimFloatArraySize + d] = (long)((floatArray[v * dimFloatArraySize + d]-minFloatArray[d]) * delta[d] + 0.5f);
+                m_quantFloatArray[v * dimFloatArray + d] = (long)((floatArray[v * dimFloatArray + d]-minFloatArray[d]) * delta[d] + 0.5f);
             }
         }
         return X3DGC_OK;
     }
+    inline void EncodeIntACEGC(long predResidual, 
+                               Arithmetic_Codec & ace,
+                               Adaptive_Data_Model & mModelValues,
+                               Static_Bit_Model & bModel0,
+                               Adaptive_Bit_Model & bModel1,
+                               const unsigned long M)
+    {
+        unsigned long uiValue;
+        if (predResidual < 0)
+        {
+            uiValue = (unsigned long) (1 - (2 * predResidual));
+        }
+        else
+        {
+            uiValue = (unsigned long) (2 * predResidual);
+        }
+        if (uiValue < M) 
+        {
+            ace.encode(uiValue, mModelValues);
+        }
+        else 
+        {
+            ace.encode(M, mModelValues);
+            ace.ExpGolombEncode(uiValue-M, 0, bModel0, bModel1);
+        }
+    }
+    inline void EncodeUIntACEGC(long predResidual, 
+                                Arithmetic_Codec & ace,
+                                Adaptive_Data_Model & mModelValues,
+                                Static_Bit_Model & bModel0,
+                                Adaptive_Bit_Model & bModel1,
+                                const unsigned long M)
+    {
+        unsigned long uiValue = (unsigned long) predResidual;
+        if (uiValue < M) 
+        {
+            ace.encode(uiValue, mModelValues);
+        }
+        else 
+        {
+            ace.encode(M, mModelValues);
+            ace.ExpGolombEncode(uiValue-M, 0, bModel0, bModel1);
+        }
+    }
     X3DGCErrorCode SC3DMCEncoder::EncodeFloatArray(const Real * const floatArray, 
-                                                   unsigned long numFloatArraySize,
-                                                   unsigned long dimFloatArraySize,
+                                                   unsigned long numFloatArray,
+                                                   unsigned long dimFloatArray,
                                                    const Real * const minFloatArray,
                                                    const Real * const maxFloatArray,
                                                    unsigned long nQBits,
@@ -196,7 +242,7 @@ namespace x3dgc
                                                    X3DGCSC3DMCPredictionMode predMode,
                                                    BinaryStream & bstream)
     {
-        assert(dimFloatArraySize <  X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
+        assert(dimFloatArray <  X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
         const AdjacencyInfo & v2T    = m_triangleListEncoder.GetVertexToTriangle();
         const long * const vmap      = m_triangleListEncoder.GetVMap();
         const long * const invVMap   = m_triangleListEncoder.GetInvVMap();
@@ -205,19 +251,42 @@ namespace x3dgc
         long tpred[X3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         long nv, nt;
         long v;
-        long predResidual;        
-        const long nvert = (long) numFloatArraySize;
-
+        long predResidual;
+        const long nvert = (long) numFloatArray;
         unsigned long start = bstream.GetSize();
-        bstream.WriteUInt32ASCII(0); 
+        unsigned char mask = predMode & 7;
+        Arithmetic_Codec ace;
+        Static_Bit_Model bModel0;
+        Adaptive_Bit_Model bModel1;
+        const unsigned long M = 256;
+        Adaptive_Data_Model mModelValues(M+2);
 
-        QuantizeFloatArray(floatArray, numFloatArraySize, dimFloatArraySize, minFloatArray, maxFloatArray, nQBits);
-
+        if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        {
+            mask += (X3DGC_SC3DMC_BINARIZATION_ASCII & 7)<<4;
+        }
+        else
+        {
+            mask += (X3DGC_SC3DMC_BINARIZATION_AC_EGC & 7)<<4;
+            const unsigned int NMAX = numFloatArray * dimFloatArray * 8 + 100;
+            if ( m_sizeBufferAC < NMAX )
+            {
+                delete [] m_bufferAC;
+                m_sizeBufferAC = NMAX;
+                m_bufferAC     = new unsigned char [m_sizeBufferAC];
+            }
+            ace.set_buffer(NMAX, m_bufferAC);
+            ace.start_encoder();
+            ace.ExpGolombEncode(0, 0, bModel0, bModel1);
+            ace.ExpGolombEncode(M, 0, bModel0, bModel1);
+        }
+        bstream.WriteUInt32(0, m_streamType);
+        bstream.WriteUChar(mask, m_streamType);
+        QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, minFloatArray, maxFloatArray, nQBits);
 #ifdef DEBUG_VERBOSE
-        printf("FloatArray (%i, %i)\n", numFloatArraySize, dimFloatArraySize);
-        fprintf(g_fileDebugEnc, "FloatArray (%i, %i)\n", numFloatArraySize, dimFloatArraySize);
+        printf("FloatArray (%i, %i)\n", numFloatArray, dimFloatArray);
+        fprintf(g_fileDebugSC3DMCEnc, "FloatArray (%i, %i)\n", numFloatArray, dimFloatArray);
 #endif //DEBUG_VERBOSE
-        
         for (long vm=0; vm < nvert; ++vm) 
         {
             v = invVMap[vm];
@@ -228,7 +297,7 @@ namespace x3dgc
             if ( v2T.GetNumNeighbors(v) > 0 && 
                  predMode != X3DGC_SC3DMC_NO_PREDICTION)
             {
-                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                for (unsigned long i = 0; i < dimFloatArray; i++) 
                 {
                     vpred[i] = 0;
                     tpred[i] = 0;
@@ -280,11 +349,11 @@ namespace x3dgc
                                 if (c != -1 && foundB)
                                 {
                                     ++nt;
-                                    for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                                    for (unsigned long i = 0; i < dimFloatArray; i++) 
                                     {
-                                        tpred[i] += m_quantFloatArray[a*dimFloatArraySize+i] + 
-                                                    m_quantFloatArray[b*dimFloatArraySize+i] - 
-                                                    m_quantFloatArray[c*dimFloatArraySize+i];
+                                        tpred[i] += m_quantFloatArray[a*dimFloatArray+i] + 
+                                                    m_quantFloatArray[b*dimFloatArray+i] - 
+                                                    m_quantFloatArray[c*dimFloatArray+i];
                                     } 
                                 }
                             }
@@ -300,9 +369,9 @@ namespace x3dgc
                             if ( vmap[w] < vm )
                             {
                                 ++nv;
-                                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                                for (unsigned long i = 0; i < dimFloatArray; i++) 
                                 {
-                                    vpred[i] += m_quantFloatArray[w*dimFloatArraySize+i];
+                                    vpred[i] += m_quantFloatArray[w*dimFloatArray+i];
                                 }
                             }
                         }
@@ -311,80 +380,187 @@ namespace x3dgc
             }
             if (nt > 0)
             {
-                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                for (unsigned long i = 0; i < dimFloatArray; i++) 
                 {
-                    predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - (tpred[i] + nt/2) / nt;
-                    bstream.WriteIntASCII(predResidual);
+                    predResidual = m_quantFloatArray[v*dimFloatArray+i] - (tpred[i] + nt/2) / nt;
+                    if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                    {
+                        bstream.WriteIntASCII(predResidual);
+                    }
+                    else
+                    {
+                        EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
+                    }
 #ifdef DEBUG_VERBOSE
-                    printf("%i\n", predResidual);
-                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
+                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
 #endif //DEBUG_VERBOSE
                 }
             }
             else if (nv > 0)
             {
-                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                for (unsigned long i = 0; i < dimFloatArray; i++) 
                 {
-                    predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - (vpred[i] + nv/2) / nv ;
-                    bstream.WriteIntASCII(predResidual);
+                    predResidual = m_quantFloatArray[v*dimFloatArray+i] - (vpred[i] + nv/2) / nv ;
+                    if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                    {
+                        bstream.WriteIntASCII(predResidual);
+                    }
+                    else
+                    {
+                        EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
+                    }
 #ifdef DEBUG_VERBOSE
-                    printf("%i\n", predResidual);
-                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
+                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
 #endif //DEBUG_VERBOSE
                 }
             }
             else if ( vm > 0)
             {
                 long prev = invVMap[vm-1];
-                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                for (unsigned long i = 0; i < dimFloatArray; i++) 
                 {
-                    predResidual = m_quantFloatArray[v*dimFloatArraySize+i] - m_quantFloatArray[prev*dimFloatArraySize+i];
-                    bstream.WriteIntASCII(predResidual);
+                    predResidual = m_quantFloatArray[v*dimFloatArray+i] - m_quantFloatArray[prev*dimFloatArray+i];
+                    if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                    {
+                        bstream.WriteIntASCII(predResidual);
+                    }
+                    else
+                    {
+                        EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
+                    }
 #ifdef DEBUG_VERBOSE
-                    printf("%i\n", predResidual);
-                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
+                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
 #endif //DEBUG_VERBOSE
                 }
             }
             else
             {
-                for (unsigned long i = 0; i < dimFloatArraySize; i++) 
+                for (unsigned long i = 0; i < dimFloatArray; i++) 
                 {
-                    predResidual = m_quantFloatArray[v*dimFloatArraySize+i];
-                    bstream.WriteIntASCII(predResidual);
+                    predResidual = m_quantFloatArray[v*dimFloatArray+i];
+                    if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                    {
+                        bstream.WriteUIntASCII(predResidual);
+                    }
+                    else
+                    {
+                        EncodeUIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
+                    }
 #ifdef DEBUG_VERBOSE
-                    printf("%i\n", predResidual);
-                    fprintf(g_fileDebugEnc, "%i\n", predResidual);
+                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
+                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
 #endif //DEBUG_VERBOSE
                 }
             }
         }
-        bstream.WriteUInt32ASCII(start, bstream.GetSize() - start);
+        if (m_streamType != X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        {
+            unsigned long encodedBytes = ace.stop_encoder();
+            for(size_t i = 0; i < encodedBytes; ++i)
+            {
+                bstream.WriteUChar8Bin(m_bufferAC[i]);
+            }
+        }
+        bstream.WriteUInt32(start, bstream.GetSize() - start, m_streamType);
 #ifdef DEBUG_VERBOSE
                     printf("Size %i\n", bstream.GetSize() - start);
-                    fprintf(g_fileDebugEnc,"Size %i\n", bstream.GetSize() - start);
+                    fprintf(g_fileDebugSC3DMCEnc,"Size %i\n", bstream.GetSize() - start);
 #endif //DEBUG_VERBOSE
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodeIntArray(const long * const intArray, 
-                                                 unsigned long numIntArraySize,
-                                                 unsigned long dimIntArraySize,
+                                                 unsigned long numIntArray,
+                                                 unsigned long dimIntArray,
+                                                 X3DGCSC3DMCPredictionMode predMode,
                                                  BinaryStream & bstream)
     {
         const long * const invVMap   = m_triangleListEncoder.GetInvVMap();
         unsigned long start = bstream.GetSize();
-        bstream.WriteUInt32ASCII(0); 
-        long v;
-        for (unsigned long vm=0; vm < numIntArraySize; ++vm) 
+        unsigned char mask = predMode & 7;
+        Arithmetic_Codec ace;
+        Static_Bit_Model bModel0;
+        Adaptive_Bit_Model bModel1;
+        const unsigned long M = 256;
+        Adaptive_Data_Model mModelValues(M+2);
+
+        long minValue = 0;
+        const unsigned long size = numIntArray * dimIntArray;
+#ifdef DEBUG_VERBOSE
+        printf("FloatArray (%i, %i)\n", numIntArray, dimIntArray);
+        fprintf(g_fileDebugSC3DMCEnc, "FloatArray (%i, %i)\n", numIntArray, dimIntArray);
+#endif //DEBUG_VERBOSE
+        for(unsigned long i = 0; i < size; ++i)
         {
-            v = invVMap[vm];
-            assert( v >= 0 && v < (long) numIntArraySize);
-            for (unsigned long i = 0; i < dimIntArraySize; i++) 
+            if (minValue > intArray[i]) 
             {
-                bstream.WriteUIntASCII(intArray[v*dimIntArraySize+i]);
+                minValue = intArray[i];
             }
         }
-        bstream.WriteUInt32ASCII(start, bstream.GetSize() - start);
+        if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        {
+            mask += (X3DGC_SC3DMC_BINARIZATION_ASCII & 7)<<4;
+        }
+        else
+        {
+            mask += (X3DGC_SC3DMC_BINARIZATION_AC_EGC & 7)<<4;
+            const unsigned int NMAX = numIntArray * dimIntArray * 8 + 100;
+            if ( m_sizeBufferAC < NMAX )
+            {
+                delete [] m_bufferAC;
+                m_sizeBufferAC = NMAX;
+                m_bufferAC     = new unsigned char [m_sizeBufferAC];
+            }
+            ace.set_buffer(NMAX, m_bufferAC);
+            ace.start_encoder();
+            ace.ExpGolombEncode(0, 0, bModel0, bModel1);
+            ace.ExpGolombEncode(M, 0, bModel0, bModel1);
+        }
+        bstream.WriteUInt32(0, m_streamType);
+        bstream.WriteUChar(mask, m_streamType);
+        bstream.WriteUInt32(minValue + X3DGC_MAX_LONG, m_streamType);
+
+        long v;
+        if (m_streamType == X3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        {
+            for (unsigned long vm=0; vm < numIntArray; ++vm) 
+            {
+                v = invVMap[vm];
+                assert( v >= 0 && v < (long) numIntArray);
+                for (unsigned long i = 0; i < dimIntArray; i++) 
+                {
+                    bstream.WriteUIntASCII(intArray[v*dimIntArray+i] - minValue);
+                }
+            }
+        }
+        else
+        {
+            for (unsigned long vm=0; vm < numIntArray; ++vm) 
+            {
+                v = invVMap[vm];
+                assert( v >= 0 && v < (long) numIntArray);
+                for (unsigned long i = 0; i < dimIntArray; i++) 
+                {
+                    EncodeUIntACEGC(intArray[v*dimIntArray+i] - minValue, ace, mModelValues, bModel0, bModel1, M);
+#ifdef DEBUG_VERBOSE
+                    printf("%i\n", intArray[v*dimIntArray+i]);
+                    fprintf(g_fileDebugSC3DMCEnc, "%i\n", intArray[v*dimIntArray+i]);
+#endif //DEBUG_VERBOSE
+                }
+            }
+            unsigned long encodedBytes = ace.stop_encoder();
+            for(size_t i = 0; i < encodedBytes; ++i)
+            {
+                bstream.WriteUChar8Bin(m_bufferAC[i]);
+            }
+        }
+        bstream.WriteUInt32(start, bstream.GetSize() - start, m_streamType);
+#ifdef DEBUG_VERBOSE
+                    printf("Size %i\n", bstream.GetSize() - start);
+                    fprintf(g_fileDebugSC3DMCEnc,"Size %i\n", bstream.GetSize() - start);
+#endif //DEBUG_VERBOSE
         return X3DGC_OK;
     }
     X3DGCErrorCode SC3DMCEncoder::EncodePayload(const SC3DMCEncodeParams & params, 
@@ -393,12 +569,10 @@ namespace x3dgc
     {
 
 #ifdef DEBUG_VERBOSE
-        g_fileDebugEnc = fopen("tfans_enc_main.txt", "w");
+        g_fileDebugSC3DMCEnc = fopen("tfans_enc_main.txt", "w");
 #endif //DEBUG_VERBOSE
-
-        m_binarization = params.GetBinarization();
         // encode triangle list        
-        m_triangleListEncoder.SetBinarization(params.GetBinarization());
+        m_triangleListEncoder.SetStreamType(params.GetStreamType());
         m_triangleListEncoder.Encode(ifs.GetCoordIndex(), ifs.GetNCoordIndex(), ifs.GetNCoord(), bstream);
 
         // encode coord
@@ -432,12 +606,11 @@ namespace x3dgc
         }
         for(unsigned long a = 0; a < ifs.GetNumIntAttributes(); ++a)
         {
-            EncodeIntArray(ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), bstream);
+            EncodeIntArray(ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), params.GetIntAttributePredMode(a), bstream);
         }
 
 #ifdef DEBUG_VERBOSE
-        fflush(g_fileDebugEnc);
-        fclose(g_fileDebugEnc);
+        fclose(g_fileDebugSC3DMCEnc);
 #endif //DEBUG_VERBOSE
         return X3DGC_OK;
     }

@@ -41,12 +41,17 @@ namespace x3dgc
         //! Constructor.
                                     CompressedTriangleFans(void)
                                     {
-                                        m_binarization = X3DGC_SC3DMC_UNKOWN;
+                                        m_streamType   = X3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
+                                        m_bufferAC     = 0;
+                                        m_sizeBufferAC = 0;
                                     };
         //! Destructor.
-                                    ~CompressedTriangleFans(void) {};
-        X3DGCSC3DMCBinarization     GetBinarization() const { return m_binarization; }
-        void                        SetBinarization(X3DGCSC3DMCBinarization binarization) { m_binarization = binarization; }
+                                    ~CompressedTriangleFans(void) 
+                                    {
+                                        delete [] m_bufferAC;
+                                    };
+        X3DGCSC3DMCStreamType     GetStreamType() const { return m_streamType; }
+        void                        SetStreamType(X3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
 
         X3DGCErrorCode              Allocate(long numVertices)
                                     {
@@ -118,16 +123,30 @@ namespace x3dgc
                                         m_indices.Clear();
                                         return X3DGC_OK;
                                     }
-        X3DGCErrorCode              Save(BinaryStream & bstream) const;
-        X3DGCErrorCode              Load(const BinaryStream & bstream, unsigned long & iterator);
+        X3DGCErrorCode              Save(BinaryStream & bstream,
+                                         X3DGCSC3DMCStreamType streamType);
+        X3DGCErrorCode              Load(const BinaryStream & bstream, 
+                                         unsigned long & iterator, 
+                                         X3DGCSC3DMCStreamType streamType);
 
     private:
+        X3DGCErrorCode              SaveBinAC(const Vector<long> & data,
+                                              BinaryStream & bstream);
+        X3DGCErrorCode              SaveUIntAC(const Vector<long> & data,
+                                               const unsigned long M,
+                                               BinaryStream & bstream);
+        X3DGCErrorCode              SaveIntACEGC(const Vector<long> & data,
+                                                 const unsigned long M,
+                                                 BinaryStream & bstream);
+
         Vector<long>                m_numTFANs;
         Vector<long>                m_degrees;
         Vector<long>                m_configs;
         Vector<long>                m_operations;
         Vector<long>                m_indices;
-        X3DGCSC3DMCBinarization     m_binarization;
+        unsigned char *             m_bufferAC;
+        unsigned long               m_sizeBufferAC;
+        X3DGCSC3DMCStreamType       m_streamType;
     };
 
     //! 

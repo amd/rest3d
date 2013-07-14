@@ -59,7 +59,7 @@ namespace x3dgc
             m_visitedVertices        = new long [m_numVertices];
         }
         
-        m_ctfans.SetBinarization(m_binarization);
+        m_ctfans.SetStreamType(m_streamType);
         m_ctfans.Allocate(m_numVertices);
         m_tfans.Allocate(2 * m_numVertices, 8 * m_numVertices);
 

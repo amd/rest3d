@@ -46,8 +46,8 @@ namespace x3dgc
                                            const long numTriangles,
                                            const long numVertices,
                                            BinaryStream & bstream);
-        X3DGCSC3DMCBinarization     GetBinarization() const { return m_binarization; }
-        void                        SetBinarization(X3DGCSC3DMCBinarization binarization) { m_binarization = binarization; }
+        X3DGCSC3DMCStreamType     GetStreamType() const { return m_streamType; }
+        void                        SetStreamType(X3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
         const long * const          GetInvVMap() const { return m_invVMap;}
         const long * const          GetVMap()    const { return m_vmap;}
         const long * const          GetTMap()    const { return m_tmap;}
@@ -88,7 +88,7 @@ namespace x3dgc
         AdjacencyInfo               m_triangleToTriangleInv;
         TriangleFans                m_tfans;
         CompressedTriangleFans      m_ctfans;
-        X3DGCSC3DMCBinarization     m_binarization;
+        X3DGCSC3DMCStreamType       m_streamType;
     };
 
 

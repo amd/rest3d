@@ -42,12 +42,15 @@ namespace x3dgc
                                     {
                                         m_quantFloatArray     = 0;
                                         m_quantFloatArraySize = 0;
-                                        m_binarization          = X3DGC_SC3DMC_UNKOWN;
+                                        m_sizeBufferAC        = 0;
+                                        m_bufferAC            = 0;
+                                        m_streamType          = X3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
                                     };
         //! Destructor.
                                     ~SC3DMCEncoder(void)
                                     {
                                         delete [] m_quantFloatArray;
+                                        delete [] m_bufferAC;
                                     }
         //! 
         X3DGCErrorCode              Encode(const SC3DMCEncodeParams & params, 
@@ -62,8 +65,8 @@ namespace x3dgc
                                                   const IndexedFaceSet & ifs, 
                                                    BinaryStream & bstream);
         X3DGCErrorCode              EncodeFloatArray(const Real * const floatArray, 
-                                                     unsigned long numfloatArraySize,
-                                                     unsigned long dimfloatArraySize,
+                                                     unsigned long numfloatArray,
+                                                     unsigned long dimfloatArray,
                                                      const Real * const minfloatArray,
                                                      const Real * const maxfloatArray,
                                                      unsigned long nQBits,
@@ -71,19 +74,22 @@ namespace x3dgc
                                                      X3DGCSC3DMCPredictionMode predMode,
                                                      BinaryStream & bstream);
         X3DGCErrorCode              QuantizeFloatArray(const Real * const floatArray, 
-                                                       unsigned long numfloatArraySize,
-                                                       unsigned long dimfloatArraySize,
+                                                       unsigned long numFloatArray,
+                                                       unsigned long dimFloatArray,
                                                        const Real * const minfloatArray,
                                                        const Real * const maxfloatArray,
                                                        unsigned long nQBits);
         X3DGCErrorCode              EncodeIntArray(const long * const intArray, 
-                                                   unsigned long numIntArraySize,
-                                                   unsigned long dimIntArraySize,
+                                                   unsigned long numIntArray,
+                                                   unsigned long dimIntArray,
+                                                   X3DGCSC3DMCPredictionMode predMode,
                                                    BinaryStream & bstream);
         TriangleListEncoder         m_triangleListEncoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;
-        X3DGCSC3DMCBinarization     m_binarization;
+        unsigned char *             m_bufferAC;
+        unsigned long               m_sizeBufferAC;
+        X3DGCSC3DMCStreamType       m_streamType;
     };
 }
 #endif // X3DGC_SC3DMC_ENCODER_H

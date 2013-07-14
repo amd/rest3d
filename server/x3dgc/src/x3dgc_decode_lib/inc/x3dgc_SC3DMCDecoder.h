@@ -40,11 +40,11 @@ namespace x3dgc
         //! Constructor.
                                     SC3DMCDecoder(void)
                                     {
-                                        m_iterator              = 0;
+                                        m_iterator            = 0;
                                         m_streamSize          = 0;
                                         m_quantFloatArray     = 0;
                                         m_quantFloatArraySize = 0;
-                                        m_binarization          = X3DGC_SC3DMC_UNKOWN;
+                                        m_streamType        = X3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
                                     };
         //! Destructor.
                                     ~SC3DMCDecoder(void)
@@ -85,7 +85,7 @@ namespace x3dgc
         TriangleListDecoder         m_triangleListDecoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;
-        X3DGCSC3DMCBinarization     m_binarization;
+        X3DGCSC3DMCStreamType       m_streamType;
     };
 
 

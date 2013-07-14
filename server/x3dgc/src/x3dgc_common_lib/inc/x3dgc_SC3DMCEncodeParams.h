@@ -37,7 +37,7 @@ namespace x3dgc
                                     {
                                         memset(this, 0, sizeof(SC3DMCEncodeParams));
                                         m_encodeMode        = X3DGC_SC3DMC_TFAN;
-                                        m_binarizationMode  = X3DGC_SC3DMC_GZIP;
+                                        m_streamTypeMode    = X3DGC_SC3DMC_STREAM_TYPE_ASCII;
                                         m_coordQuantBits    = 12;
                                         m_normalQuantBits   = 10;
                                         m_colorQuantBits    = 10;
@@ -58,7 +58,7 @@ namespace x3dgc
         //! Destructor.
                                     ~SC3DMCEncodeParams(void) {};
 
-        X3DGCSC3DMCBinarization     GetBinarization()  const { return m_binarizationMode;}
+        X3DGCSC3DMCStreamType       GetStreamType()    const { return m_streamTypeMode;}
         X3DGCSC3DMCEncodingMode     GetEncodeMode()    const { return m_encodeMode;}
 
         unsigned long               GetNFloatAttributes()  const { return m_numFloatAttributes;}
@@ -88,7 +88,7 @@ namespace x3dgc
                                         assert(a < X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                         return m_intAttributePredMode[a];
                                     }
-        void                        SetBinarization(X3DGCSC3DMCBinarization binarizationMode)  { m_binarizationMode = binarizationMode;}
+        void                        SetStreamType(X3DGCSC3DMCStreamType streamTypeMode)  { m_streamTypeMode = streamTypeMode;}
         void                        SetEncodeMode(X3DGCSC3DMCEncodingMode encodeMode)  { m_encodeMode = encodeMode;}
         void                        SetNFloatAttributes(unsigned long numFloatAttributes) 
                                     { 
@@ -138,7 +138,7 @@ namespace x3dgc
         X3DGCSC3DMCPredictionMode   m_colorPredMode; 
         X3DGCSC3DMCPredictionMode   m_floatAttributePredMode[X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES];
         X3DGCSC3DMCPredictionMode   m_intAttributePredMode  [X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES];
-        X3DGCSC3DMCBinarization     m_binarizationMode;
+        X3DGCSC3DMCStreamType     m_streamTypeMode;
         X3DGCSC3DMCEncodingMode     m_encodeMode;
     };
 }
