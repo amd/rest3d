@@ -138,7 +138,7 @@ namespace x3dgc
         X3DGCSC3DMCPredictionMode   m_colorPredMode; 
         X3DGCSC3DMCPredictionMode   m_floatAttributePredMode[X3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES];
         X3DGCSC3DMCPredictionMode   m_intAttributePredMode  [X3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES];
-        X3DGCSC3DMCStreamType     m_streamTypeMode;
+        X3DGCSC3DMCStreamType       m_streamTypeMode;
         X3DGCSC3DMCEncodingMode     m_encodeMode;
     };
 }

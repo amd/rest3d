@@ -299,7 +299,7 @@ int main(int argc, char * argv[])
     int qcoord    = 12;
     int qtexCoord = 10;
     int qnormal   = 10;
-    X3DGCSC3DMCStreamType streamType = X3DGC_SC3DMC_STREAM_TYPE_BINARY;
+    X3DGCSC3DMCStreamType streamType = X3DGC_SC3DMC_STREAM_TYPE_ASCII;
     for(int i = 1; i < argc; ++i)
     {
         if ( !strcmp(argv[i], "-c"))
