@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+project(opengc)
+set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/output" CACHE PATH "project install prefix" FORCE)
+set(CMAKE_COMMON_INC "${${PROJECT_NAME}_SOURCE_DIR}/../scripts/cmake_common.cmake")
+add_subdirectory ("${${PROJECT_NAME}_SOURCE_DIR}/opengc_common_lib")
+add_subdirectory ("${${PROJECT_NAME}_SOURCE_DIR}/opengc_encode_lib")
+add_subdirectory ("${${PROJECT_NAME}_SOURCE_DIR}/opengc_decode_lib")
+add_subdirectory ("${${PROJECT_NAME}_SOURCE_DIR}/test")
