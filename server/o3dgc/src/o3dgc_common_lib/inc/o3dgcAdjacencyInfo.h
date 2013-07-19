@@ -29,7 +29,6 @@ THE SOFTWARE.
 
 namespace o3dgc
 {
-    class TriangleListEncoder;
     const long O3DGC_MIN_NEIGHBORS_SIZE     = 128;
     const long O3DGC_MIN_NUM_NEIGHBORS_SIZE = 16;
     //! 
@@ -141,15 +140,15 @@ namespace o3dgc
                                 { 
                                     return End(element) - Begin(element);
                                 }
+        long * const            GetNumNeighborsBuffer() { return m_numNeighbors;}
+        long * const            GetNeighborsBuffer()    { return m_neighbors;}
+
     private:
         long                    m_neighborsSize;    // actual allocated size for m_neighbors
         long                    m_numNeighborsSize; // actual allocated size for m_numNeighbors
         long                    m_numElements;      // number of elements 
         long *                  m_neighbors;        // 
-        long *                  m_numNeighbors;     // 
-        
-        friend class TriangleListEncoder;
-        friend class TriangleListDecoder;
+        long *                  m_numNeighbors;     //         
     };
 }
 #endif // O3DGC_ADJACENCY_INFO_H

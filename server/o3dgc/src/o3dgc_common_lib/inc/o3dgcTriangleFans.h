@@ -270,8 +270,7 @@ namespace o3dgc
         long                        m_numVertices;
         long *                      m_vertices;
         long *                      m_sizeTFAN;
-        
-    friend class TriangleListEncoder;
+    
     };
 }
 #endif // O3DGC_TRIANGLE_FANS_H

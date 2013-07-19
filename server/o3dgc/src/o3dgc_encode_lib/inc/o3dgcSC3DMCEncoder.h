@@ -34,6 +34,7 @@ THE SOFTWARE.
 namespace o3dgc
 {    
     //! 
+    template<class T>
     class SC3DMCEncoder
     {
     public:    
@@ -54,15 +55,15 @@ namespace o3dgc
                                     }
         //! 
         O3DGCErrorCode              Encode(const SC3DMCEncodeParams & params, 
-                                           const IndexedFaceSet & ifs, 
+                                           const IndexedFaceSet<T> & ifs, 
                                            BinaryStream & bstream);    
 
         private:
         O3DGCErrorCode              EncodeHeader(const SC3DMCEncodeParams & params, 
-                                                 const IndexedFaceSet & ifs, 
+                                                 const IndexedFaceSet<T> & ifs, 
                                                  BinaryStream & bstream);
         O3DGCErrorCode              EncodePayload(const SC3DMCEncodeParams & params, 
-                                                  const IndexedFaceSet & ifs, 
+                                                  const IndexedFaceSet<T> & ifs, 
                                                   BinaryStream & bstream);
         O3DGCErrorCode              EncodeFloatArray(const Real * const floatArray, 
                                                      unsigned long numfloatArray,
@@ -70,7 +71,7 @@ namespace o3dgc
                                                      const Real * const minfloatArray,
                                                      const Real * const maxfloatArray,
                                                      unsigned long nQBits,
-                                                     const IndexedFaceSet & ifs,
+                                                     const IndexedFaceSet<T> & ifs,
                                                      O3DGCSC3DMCPredictionMode predMode,
                                                      BinaryStream & bstream);
         O3DGCErrorCode              QuantizeFloatArray(const Real * const floatArray, 
@@ -84,13 +85,14 @@ namespace o3dgc
                                                    unsigned long dimIntArray,
                                                    O3DGCSC3DMCPredictionMode predMode,
                                                    BinaryStream & bstream);
-        TriangleListEncoder         m_triangleListEncoder;
+        TriangleListEncoder<T>      m_triangleListEncoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;
         unsigned char *             m_bufferAC;
         unsigned long               m_sizeBufferAC;
-        O3DGCSC3DMCStreamType         m_streamType;
+        O3DGCSC3DMCStreamType       m_streamType;
     };
 }
+#include "o3dgcSC3DMCEncoder.inl"    // template implementation
 #endif // O3DGC_SC3DMC_ENCODER_H
 

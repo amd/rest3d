@@ -20,19 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "o3dgcTriangleListEncoder.h"
-
-//#define DEBUG_VERBOSE
+#pragma once
+#ifndef O3DGC_TRIANGLE_LIST_ENCODER_INL
+#define O3DGC_TRIANGLE_LIST_ENCODER_INL
 
 namespace o3dgc
 {
-#ifdef DEBUG_VERBOSE
-        FILE* g_fileDebugEncTL = NULL;
-#endif //DEBUG_VERBOSE
-
     // extract opposite edge
+    template <class T>
     inline void CompueOppositeEdge(const long focusVertex, 
-                                   const long * triangle,
+                                   const T * triangle,
                                    long & a, long & b)
     {                
         if (triangle[0] == focusVertex)
@@ -167,9 +164,8 @@ namespace o3dgc
             (ops[0] != 1)      ||(ops[degree-1] != 1)  ) return false;
         return true;
     }
-
-
-    TriangleListEncoder::TriangleListEncoder(void)
+    template <class T>
+    TriangleListEncoder<T>::TriangleListEncoder(void)
     {
         m_vtags                   = 0;
         m_ttags                   = 0;
@@ -190,7 +186,8 @@ namespace o3dgc
         m_maxSizeVertexToTriangle = 0;
         m_streamType            = O3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
     }
-    TriangleListEncoder::~TriangleListEncoder()
+    template <class T>
+    TriangleListEncoder<T>::~TriangleListEncoder()
     {
         delete [] m_vtags;
         delete [] m_vmap;
@@ -202,7 +199,8 @@ namespace o3dgc
         delete [] m_nonConqueredTriangles;
         delete [] m_nonConqueredEdges;
     }
-    O3DGCErrorCode TriangleListEncoder::Init(const long * const triangles, 
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::Init(const T * const triangles, 
                                              long numTriangles, 
                                              long numVertices)
     {
@@ -256,18 +254,19 @@ namespace o3dgc
         // compute vertex-to-triangle adjacency information
         m_vertexToTriangle.AllocateNumNeighborsArray(numVertices);
         m_vertexToTriangle.ClearNumNeighborsArray();
+        long * numNeighbors = m_vertexToTriangle.GetNumNeighborsBuffer();
         for(long i = 0, t = 0; i < m_numTriangles; ++i, t+=3)
         {
-            ++(m_vertexToTriangle.m_numNeighbors[ triangles[t  ] ]);
-            ++(m_vertexToTriangle.m_numNeighbors[ triangles[t+1] ]);
-            ++(m_vertexToTriangle.m_numNeighbors[ triangles[t+2] ]);
+            ++numNeighbors[ triangles[t  ] ];
+            ++numNeighbors[ triangles[t+1] ];
+            ++numNeighbors[ triangles[t+2] ];
         }
         m_maxSizeVertexToTriangle = 0;
         for(long i = 0; i < numVertices; ++i)
         {
-            if (m_maxSizeVertexToTriangle < m_vertexToTriangle.m_numNeighbors[i])
+            if (m_maxSizeVertexToTriangle < numNeighbors[i])
             {
-                m_maxSizeVertexToTriangle = m_vertexToTriangle.m_numNeighbors[i];
+                m_maxSizeVertexToTriangle = numNeighbors[i];
             }
         }
         m_vertexToTriangle.AllocateNeighborsArray();
@@ -280,7 +279,8 @@ namespace o3dgc
         }
         return O3DGC_OK;
     }
-    O3DGCErrorCode TriangleListEncoder::Encode(const long * const triangles, 
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::Encode(const T * const triangles, 
                                                const long numTriangles,
                                                const long numVertices, 
                                                BinaryStream & bstream)
@@ -288,10 +288,6 @@ namespace o3dgc
         assert(numVertices > 0);
         assert(numTriangles > 0);
         
-#ifdef DEBUG_VERBOSE
-        g_fileDebugEncTL = fopen("tfans_new.txt", "w");
-#endif //DEBUG_VERBOSE
-
         Init(triangles, numTriangles, numVertices);
         bstream.WriteUChar(0, m_streamType); // vertex/triangles orders not preserved
         bstream.WriteUInt32(m_maxSizeVertexToTriangle, m_streamType);
@@ -312,13 +308,11 @@ namespace o3dgc
                 }
             }
         }
-#ifdef DEBUG_VERBOSE
-        fclose(g_fileDebugEncTL);
-#endif //DEBUG_VERBOSE
         m_ctfans.Save(bstream, m_streamType);
         return O3DGC_OK;
     }
-    O3DGCErrorCode TriangleListEncoder::CompueLocalConnectivityInfo(const long focusVertex)
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::CompueLocalConnectivityInfo(const long focusVertex)
     {
         long t, v, p;
         m_numNonConqueredTriangles = 0;
@@ -408,19 +402,21 @@ namespace o3dgc
             m_triangleToTriangle.ClearNumNeighborsArray();
             m_triangleToTriangleInv.AllocateNumNeighborsArray(m_numNonConqueredTriangles);
             m_triangleToTriangleInv.ClearNumNeighborsArray();
+            long * const numNeighbors    = m_triangleToTriangle.GetNumNeighborsBuffer();
+            long * const invNumNeighbors = m_triangleToTriangleInv.GetNumNeighborsBuffer();
             for(long i = 0; i < m_numNonConqueredTriangles; ++i)
             {
                 for(long j = i+1; j < m_numNonConqueredTriangles; ++j)
                 {
                     if (m_nonConqueredEdges[2*i+1] == m_nonConqueredEdges[2*j]) // edge i is connected to edge j
                     {
-                        ++m_triangleToTriangle.m_numNeighbors[i];
-                        ++m_triangleToTriangleInv.m_numNeighbors[j];
+                        ++numNeighbors[i];
+                        ++invNumNeighbors[j];
                     }
                     if (m_nonConqueredEdges[2*i] == m_nonConqueredEdges[2*j+1]) // edge i is connected to edge j
                     {
-                        ++m_triangleToTriangle.m_numNeighbors[j];
-                        ++m_triangleToTriangleInv.m_numNeighbors[i];
+                        ++numNeighbors[j];
+                        ++invNumNeighbors[i];
                     }
                 }
             }
@@ -447,7 +443,8 @@ namespace o3dgc
         }
         return O3DGC_OK;
     }
-    O3DGCErrorCode TriangleListEncoder::ComputeTFANDecomposition(const long focusVertex)
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::ComputeTFANDecomposition(const long focusVertex)
     {
         long processedTriangles = 0;
         long minNumInputEdges;
@@ -514,14 +511,10 @@ namespace o3dgc
 
         return O3DGC_OK;
     }
-    O3DGCErrorCode TriangleListEncoder::CompressTFAN(const long focusVertex)
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::CompressTFAN(const long focusVertex)
     {
         m_ctfans.PushNumTFans(m_tfans.GetNumTFANs());    
-
-#ifdef DEBUG_VERBOSE
-        printf("#fans %i\n", (int) m_tfans.GetNumTFANs());
-        fprintf(g_fileDebugEncTL, "#fans %i\n", (int) m_tfans.GetNumTFANs());
-#endif //DEBUG_VERBOSE
 
         const long ntfans = m_tfans.GetNumTFANs();
         long degree;
@@ -543,17 +536,6 @@ namespace o3dgc
                 m_ctfans.PushDegree(degree-2+ m_numConqueredTriangles);
                 numOps     = 0;
                 numIndices = 0;
-#ifdef DEBUG_VERBOSE
-                    printf("VisitedVertices (%i, %i) \t", m_vmap[focusVertex], -1);
-                    fprintf(g_fileDebugEncTL, "VisitedVertices (%i, %i) \t", m_vmap[focusVertex], -1);
-                    for(long u=0; u < m_numVisitedVertices; ++u)
-                    {
-                        printf("%i, ", m_visitedVertices[u]);
-                        fprintf(g_fileDebugEncTL, "%i, ", m_visitedVertices[u]);
-                    }
-                    printf("\n");
-                    fprintf(g_fileDebugEncTL, "\n");
-#endif //DEBUG_VERBOSE
                 k0 = 1 + m_tfans.Begin(f);
                 k1 = m_tfans.End(f);
                 for(long k = k0; k < k1; k++) 
@@ -591,27 +573,12 @@ namespace o3dgc
                             indices[numIndices++] = m_vmap[v0] - m_vmap[focusVertex];
                         }
                     }
-#ifdef DEBUG_VERBOSE
-                    printf("VisitedVertices (%i, %i) \t", m_vmap[focusVertex], v0);
-                    fprintf(g_fileDebugEncTL, "VisitedVertices (%i, %i) \t", m_vmap[focusVertex], v0);
-                    for(long u=0; u < m_numVisitedVertices; ++u)
-                    {
-                        printf("%i, ", m_visitedVertices[u]);
-                        fprintf(g_fileDebugEncTL, "%i, ", m_visitedVertices[u]);
-                    }
-                    printf("\n");
-                    fprintf(g_fileDebugEncTL, "\n");
-#endif //DEBUG_VERBOSE
                 }
                 //-----------------------------------------------
                 if (IsCase0(degree, numIndices, ops, indices))
                 { 
                     // ops: 1000001 vertices: -1 -2
                     m_ctfans.PushConfig(0);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 0\t");
-                    fprintf(g_fileDebugEncTL, "Case 0\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase1(degree, numIndices, ops, indices))
                 {
@@ -626,64 +593,36 @@ namespace o3dgc
                         m_ctfans.PushIndex(indices[u]);
                     }
                     m_ctfans.PushConfig(1);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 1\t");
-                    fprintf(g_fileDebugEncTL, "Case 1\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase2(degree, numIndices, ops, indices))
                 {
                     // ops: 00000001 vertices: -1
                     m_ctfans.PushConfig(2);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 2\t");
-                    fprintf(g_fileDebugEncTL, "Case 2\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase3(degree, numIndices, ops, indices))
                 {
                     // ops: 00000001 vertices: -2
                     m_ctfans.PushConfig(3);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 3\t");
-                    fprintf(g_fileDebugEncTL, "Case 3\t");
-#endif //DEBUG_VERBOSE
                 }            
                 else if (IsCase4(degree, numIndices, ops, indices))
                 {
                     // ops: 10000000 vertices: -1
                     m_ctfans.PushConfig(4);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 4\t");
-                    fprintf(g_fileDebugEncTL, "Case 4\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase5(degree, numIndices, ops, indices))
                 {
                     // ops: 10000000 vertices: -2
                     m_ctfans.PushConfig(5);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 5\t");
-                    fprintf(g_fileDebugEncTL, "Case 5\t");
-#endif //DEBUG_VERBOSE
                 }            
                 else if (IsCase6(degree, numIndices, ops, indices))
                 {
                     // ops: 00000000 vertices:
                     m_ctfans.PushConfig(6);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 6\t");
-                    fprintf(g_fileDebugEncTL, "Case 6\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase7(degree, numIndices, ops, indices))
                 {
                     // ops: 1000001 vertices: -1 -2
                     m_ctfans.PushConfig(7);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 7\t");
-                    fprintf(g_fileDebugEncTL, "Case 7\t");
-#endif //DEBUG_VERBOSE
                 }
                 else if (IsCase8(degree, numIndices, ops, indices))
                 {
@@ -698,10 +637,6 @@ namespace o3dgc
                         m_ctfans.PushIndex(indices[u]);
                     }
                     m_ctfans.PushConfig(8);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 8\t");
-                    fprintf(g_fileDebugEncTL, "Case 8\t");
-#endif //DEBUG_VERBOSE
                 }
                 else 
                 {
@@ -715,59 +650,18 @@ namespace o3dgc
                         m_ctfans.PushIndex(indices[u]);
                     }
                     m_ctfans.PushConfig(9);
-#ifdef DEBUG_VERBOSE
-                    printf("Case 9\t");
-                    fprintf(g_fileDebugEncTL, "Case 9\t");
-#endif //DEBUG_VERBOSE
                 }
-
-#ifdef DEBUG_VERBOSE
-                printf("v(%i)\t%i\t(", m_vmap[focusVertex], degree);
-                fprintf(g_fileDebugEncTL, "v(%i)\t%i\t(", m_vmap[focusVertex], degree);
-                for (long y = 0; y < numOps; y++)
-                {
-                    printf("%i", ops[y]);
-                    fprintf(g_fileDebugEncTL, "%i", ops[y]);
-                }
-                printf(")\t(");
-                fprintf(g_fileDebugEncTL, ")\t(");
-                for (long y = 0; y < numIndices; y++)
-                {
-                    printf("%i, ", indices[y]);
-                    fprintf(g_fileDebugEncTL, "%i, ", indices[y]);
-                }
-                printf(")\t(");
-                fprintf(g_fileDebugEncTL, ")\t(");
-
-                for(long k = k0; k < k1; k++) 
-                {
-                    v0 = m_tfans.GetVertex(k);
-                    printf("%i, ", v0);
-                    fprintf(g_fileDebugEncTL, "%i, ", v0);
-                }
-                printf(")\n");
-                fprintf(g_fileDebugEncTL, ")\n");
-#endif //DEBUG_VERBOSE
             }
-        }
-        else 
-        {
-#ifdef DEBUG_VERBOSE
-            printf("v(%i)\t%i\n", m_vmap[focusVertex], 0);
-            fprintf(g_fileDebugEncTL, "v(%i)\t%i\n", m_vmap[focusVertex], 0);
-#endif //DEBUG_VERBOSE
         }
         return O3DGC_OK;
     }
-    O3DGCErrorCode TriangleListEncoder::ProcessVertex(const long focusVertex)
+    template <class T>
+    O3DGCErrorCode TriangleListEncoder<T>::ProcessVertex(const long focusVertex)
     {
         CompueLocalConnectivityInfo(focusVertex);
         ComputeTFANDecomposition(focusVertex);
         CompressTFAN(focusVertex);
-#ifdef DEBUG_VERBOSE
-        fflush(g_fileDebugEncTL);
-#endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
 }
-
+#endif //O3DGC_TRIANGLE_LIST_ENCODER_INL

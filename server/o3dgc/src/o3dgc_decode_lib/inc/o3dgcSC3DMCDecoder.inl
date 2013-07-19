@@ -20,19 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "o3dgcSC3DMCDecoder.h"
-#include "o3dgcArithmeticCodec.h"
+#pragma once
+#ifndef O3DGC_SC3DMC_DECODER_INL
+#define O3DGC_SC3DMC_DECODER_INL
 
-//#define DEBUG_VERBOSE
+#include "o3dgcArithmeticCodec.h"
 
 namespace o3dgc
 {
-#ifdef DEBUG_VERBOSE
-        FILE* g_fileDebugSC3DMCDec = NULL;
-#endif //DEBUG_VERBOSE
-
-    O3DGCErrorCode SC3DMCDecoder::DecodeHeader(IndexedFaceSet & ifs, 
-                                               const BinaryStream & bstream)
+    template<class T>
+    O3DGCErrorCode SC3DMCDecoder<T>::DecodeHeader(IndexedFaceSet<T> & ifs, 
+                                                  const BinaryStream & bstream)
     {
         unsigned long iterator0 = m_iterator;
         unsigned long start_code = bstream.ReadUInt32(m_iterator, O3DGC_SC3DMC_STREAM_TYPE_BINARY);
@@ -151,9 +149,9 @@ namespace o3dgc
         }    
         return O3DGC_OK;
     }
-
-    O3DGCErrorCode SC3DMCDecoder::DecodePlayload(IndexedFaceSet & ifs,
-                                                 const BinaryStream & bstream)
+    template<class T>
+    O3DGCErrorCode SC3DMCDecoder<T>::DecodePlayload(IndexedFaceSet<T> & ifs,
+                                                    const BinaryStream & bstream)
     {
 #ifdef DEBUG_VERBOSE
         g_fileDebugSC3DMCDec = fopen("tfans_dec_main.txt", "w");
@@ -239,7 +237,8 @@ namespace o3dgc
         }
         return uiValue;
     }
-    O3DGCErrorCode SC3DMCDecoder::DecodeIntArray(long * const intArray, 
+    template<class T>
+    O3DGCErrorCode SC3DMCDecoder<T>::DecodeIntArray(long * const intArray, 
                                                  unsigned long numIntArray,
                                                  unsigned long dimIntArray,
                                                  const BinaryStream & bstream)
@@ -251,7 +250,8 @@ namespace o3dgc
         Static_Bit_Model bModel0;
         Adaptive_Bit_Model bModel1;
         unsigned long sizeSize = bstream.ReadUInt32(m_iterator, m_streamType) - 9;        // bitsream size
-        unsigned char mask = bstream.ReadUChar(m_iterator, m_streamType);
+//        unsigned char mask = bstream.ReadUChar(m_iterator, m_streamType);
+        bstream.ReadUChar(m_iterator, m_streamType);
         unsigned int exp_k;
         unsigned int M = 0;
         long minValue = bstream.ReadUInt32(m_iterator, m_streamType) - O3DGC_MAX_LONG;
@@ -304,19 +304,20 @@ namespace o3dgc
 #endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
-    O3DGCErrorCode SC3DMCDecoder::DecodeFloatArray(Real * const floatArray, 
+    template<class T>
+    O3DGCErrorCode SC3DMCDecoder<T>::DecodeFloatArray(Real * const floatArray, 
                                                    unsigned long numFloatArray,
                                                    unsigned long dimFloatArray,
                                                    const Real * const minFloatArray,
                                                    const Real * const maxFloatArray,
                                                    unsigned long nQBits,
-                                                   const IndexedFaceSet & ifs,
+                                                   const IndexedFaceSet<T> & ifs,
                                                    O3DGCSC3DMCPredictionMode predMode,
                                                    const BinaryStream & bstream)
     {
         assert(dimFloatArray <  O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
         const AdjacencyInfo & v2T    = m_triangleListDecoder.GetVertexToTriangle();
-        const long * const triangles = ifs.GetCoordIndex();
+        const T * const triangles = ifs.GetCoordIndex();
         long vpred[O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         long tpred[O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         long nv, nt;
@@ -328,7 +329,8 @@ namespace o3dgc
         Static_Bit_Model bModel0;
         Adaptive_Bit_Model bModel1;
         unsigned long sizeSize = bstream.ReadUInt32(m_iterator, m_streamType) - 5;        // bitsream size
-        unsigned char mask = bstream.ReadUChar(m_iterator, m_streamType);
+//        unsigned char mask = bstream.ReadUChar(m_iterator, m_streamType);
+        bstream.ReadUChar(m_iterator, m_streamType);
         unsigned int exp_k;
         unsigned int M = 0;
         if (m_streamType != O3DGC_SC3DMC_STREAM_TYPE_ASCII)
@@ -532,7 +534,8 @@ namespace o3dgc
 #endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
-    O3DGCErrorCode SC3DMCDecoder::IQuantizeFloatArray(Real * const floatArray, 
+    template<class T>
+    O3DGCErrorCode SC3DMCDecoder<T>::IQuantizeFloatArray(Real * const floatArray, 
                                                       unsigned long numFloatArray,
                                                       unsigned long dimFloatArray,
                                                       const Real * const minFloatArray,
@@ -564,5 +567,6 @@ namespace o3dgc
         return O3DGC_OK;
     }
 }
+#endif // O3DGC_SC3DMC_DECODER_INL
 
 

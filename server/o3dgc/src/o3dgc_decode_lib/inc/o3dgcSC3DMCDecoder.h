@@ -22,8 +22,8 @@ THE SOFTWARE.
 
 
 #pragma once
-#ifndef O3DGC_SC3DMC_H
-#define O3DGC_SC3DMC_H
+#ifndef O3DGC_SC3DMC_DECODER_H
+#define O3DGC_SC3DMC_DECODER_H
 
 #include "o3dgcCommon.h"
 #include "o3dgcBinaryStream.h"
@@ -34,6 +34,7 @@ THE SOFTWARE.
 namespace o3dgc
 {    
     //! 
+    template <class T>
     class SC3DMCDecoder
     {
     public:    
@@ -52,11 +53,11 @@ namespace o3dgc
                                         delete [] m_quantFloatArray;
                                     }
         //!
-        O3DGCErrorCode              DecodeHeader(IndexedFaceSet & ifs,
+        O3DGCErrorCode              DecodeHeader(IndexedFaceSet<T> & ifs,
                                                  const BinaryStream & bstream);
         //!                         
-        O3DGCErrorCode              DecodePlayload(IndexedFaceSet & ifs,
-                                           const BinaryStream & bstream);
+        O3DGCErrorCode              DecodePlayload(IndexedFaceSet<T> & ifs,
+                                                  const BinaryStream & bstream);
                                     
     private:                        
         O3DGCErrorCode              DecodeFloatArray(Real * const floatArray,
@@ -65,7 +66,7 @@ namespace o3dgc
                                                      const Real * const minfloatArray,
                                                      const Real * const maxfloatArray,
                                                      unsigned long nQBits,
-                                                     const IndexedFaceSet & ifs,
+                                                     const IndexedFaceSet<T> & ifs,
                                                      O3DGCSC3DMCPredictionMode predMode,
                                                      const BinaryStream & bstream);
         O3DGCErrorCode              IQuantizeFloatArray(Real * const floatArray,
@@ -82,13 +83,12 @@ namespace o3dgc
         unsigned long               m_iterator;
         unsigned long               m_streamSize;
         SC3DMCEncodeParams          m_params;
-        TriangleListDecoder         m_triangleListDecoder;
+        TriangleListDecoder<T>      m_triangleListDecoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;
-        O3DGCSC3DMCStreamType         m_streamType;
+        O3DGCSC3DMCStreamType       m_streamType;
     };
-
-
 }
-#endif // O3DGC_SC3DMC_H
+#include "o3dgcSC3DMCDecoder.inl"    // template implementation
+#endif // O3DGC_SC3DMC_DECODER_H
 

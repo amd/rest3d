@@ -20,9 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <math.h>
-#include "o3dgcIndexedFaceSet.h"
+#pragma once
+#ifndef O3DGC_INDEXED_FACE_SET_INL
+#define O3DGC_INDEXED_FACE_SET_INL
 
+#include <math.h>
 namespace o3dgc
 {
     void ComputeVectorMinMax(const Real * const tab, 
@@ -84,7 +86,8 @@ namespace o3dgc
             } 
         }
     }
-    void IndexedFaceSet::ComputeMinMax(O3DGCSC3DMCQuantizationMode quantMode)
+    template <class T>
+    void IndexedFaceSet<T>::ComputeMinMax(O3DGCSC3DMCQuantizationMode quantMode)
     {
         ComputeVectorMinMax(m_coord   , m_nCoord   , 3, m_coordMin   , m_coordMax   , quantMode);
         ComputeVectorMinMax(m_normal  , m_nNormal  , 3, m_normalMin  , m_normalMax  , quantMode);
@@ -99,4 +102,4 @@ namespace o3dgc
         }
     }
 }
-
+#endif // O3DGC_INDEXED_FACE_SET_INL

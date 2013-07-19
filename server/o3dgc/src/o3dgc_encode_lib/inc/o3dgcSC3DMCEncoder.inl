@@ -20,20 +20,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "o3dgcSC3DMCEncoder.h"
-#include "o3dgcArithmeticCodec.h"
+#pragma once
+#ifndef O3DGC_SC3DMC_ENCODER_INL
+#define O3DGC_SC3DMC_ENCODER_INL
 
-//#define DEBUG_VERBOSE
+
+#include "o3dgcArithmeticCodec.h"
 
 namespace o3dgc
 {
-#ifdef DEBUG_VERBOSE
-        FILE* g_fileDebugSC3DMCEnc = NULL;
-#endif //DEBUG_VERBOSE
-
-    O3DGCErrorCode SC3DMCEncoder::Encode(const SC3DMCEncodeParams & params, 
-                                  const IndexedFaceSet & ifs, 
-                                  BinaryStream & bstream)
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::Encode(const SC3DMCEncodeParams & params, 
+                                            const IndexedFaceSet<T> & ifs, 
+                                            BinaryStream & bstream)
     {
         // Encode header
         unsigned long start = bstream.GetSize();
@@ -43,8 +42,9 @@ namespace o3dgc
         bstream.WriteUInt32(O3DGC_BINARY_STREAM_NUM_SYMBOLS_UINT32, bstream.GetSize() - start, m_streamType);
         return O3DGC_OK;
     }
-    O3DGCErrorCode SC3DMCEncoder::EncodeHeader(const SC3DMCEncodeParams & params, 
-                                               const IndexedFaceSet & ifs, 
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::EncodeHeader(const SC3DMCEncodeParams & params, 
+                                               const IndexedFaceSet<T> & ifs, 
                                                BinaryStream & bstream)
     {
         m_streamType = params.GetStreamType();
@@ -151,7 +151,8 @@ namespace o3dgc
         }    
         return O3DGC_OK;
     }    
-    O3DGCErrorCode SC3DMCEncoder::QuantizeFloatArray(const Real * const floatArray, 
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::QuantizeFloatArray(const Real * const floatArray, 
                                                    unsigned long numFloatArray,
                                                    unsigned long dimFloatArray,
                                                    const Real * const minFloatArray,
@@ -232,21 +233,22 @@ namespace o3dgc
             ace.ExpGolombEncode(uiValue-M, 0, bModel0, bModel1);
         }
     }
-    O3DGCErrorCode SC3DMCEncoder::EncodeFloatArray(const Real * const floatArray, 
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::EncodeFloatArray(const Real * const floatArray, 
                                                    unsigned long numFloatArray,
                                                    unsigned long dimFloatArray,
                                                    const Real * const minFloatArray,
                                                    const Real * const maxFloatArray,
                                                    unsigned long nQBits,
-                                                   const IndexedFaceSet & ifs,
+                                                   const IndexedFaceSet<T> & ifs,
                                                    O3DGCSC3DMCPredictionMode predMode,
                                                    BinaryStream & bstream)
     {
         assert(dimFloatArray <  O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES);
-        const AdjacencyInfo & v2T    = m_triangleListEncoder.GetVertexToTriangle();
-        const long * const vmap      = m_triangleListEncoder.GetVMap();
-        const long * const invVMap   = m_triangleListEncoder.GetInvVMap();
-        const long * const triangles = ifs.GetCoordIndex();
+        const AdjacencyInfo & v2T     = m_triangleListEncoder.GetVertexToTriangle();
+        const long * const vmap       = m_triangleListEncoder.GetVMap();
+        const long * const invVMap    = m_triangleListEncoder.GetInvVMap();
+        const T * const triangles = ifs.GetCoordIndex();
         long vpred[O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         long tpred[O3DGC_SC3DMC_MAX_DIM_FLOAT_ATTRIBUTES];
         long nv, nt;
@@ -283,10 +285,6 @@ namespace o3dgc
         bstream.WriteUInt32(0, m_streamType);
         bstream.WriteUChar(mask, m_streamType);
         QuantizeFloatArray(floatArray, numFloatArray, dimFloatArray, minFloatArray, maxFloatArray, nQBits);
-#ifdef DEBUG_VERBOSE
-        printf("FloatArray (%i, %i)\n", numFloatArray, dimFloatArray);
-        fprintf(g_fileDebugSC3DMCEnc, "FloatArray (%i, %i)\n", numFloatArray, dimFloatArray);
-#endif //DEBUG_VERBOSE
         for (long vm=0; vm < nvert; ++vm) 
         {
             v = invVMap[vm];
@@ -391,10 +389,6 @@ namespace o3dgc
                     {
                         EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
                     }
-#ifdef DEBUG_VERBOSE
-                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
-                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
-#endif //DEBUG_VERBOSE
                 }
             }
             else if (nv > 0)
@@ -410,10 +404,6 @@ namespace o3dgc
                     {
                         EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
                     }
-#ifdef DEBUG_VERBOSE
-                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
-                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
-#endif //DEBUG_VERBOSE
                 }
             }
             else if ( vm > 0)
@@ -430,10 +420,6 @@ namespace o3dgc
                     {
                         EncodeIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
                     }
-#ifdef DEBUG_VERBOSE
-                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
-                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
-#endif //DEBUG_VERBOSE
                 }
             }
             else
@@ -449,10 +435,6 @@ namespace o3dgc
                     {
                         EncodeUIntACEGC(predResidual, ace, mModelValues, bModel0, bModel1, M);
                     }
-#ifdef DEBUG_VERBOSE
-                    printf("%i \t %i\n", vm*dimFloatArray+i, predResidual);
-                    fprintf(g_fileDebugSC3DMCEnc, "%i \t %i\n", vm*dimFloatArray+i, predResidual);
-#endif //DEBUG_VERBOSE
                 }
             }
         }
@@ -465,13 +447,10 @@ namespace o3dgc
             }
         }
         bstream.WriteUInt32(start, bstream.GetSize() - start, m_streamType);
-#ifdef DEBUG_VERBOSE
-                    printf("Size %i\n", bstream.GetSize() - start);
-                    fprintf(g_fileDebugSC3DMCEnc,"Size %i\n", bstream.GetSize() - start);
-#endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
-    O3DGCErrorCode SC3DMCEncoder::EncodeIntArray(const long * const intArray, 
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::EncodeIntArray(const long * const intArray, 
                                                  unsigned long numIntArray,
                                                  unsigned long dimIntArray,
                                                  O3DGCSC3DMCPredictionMode predMode,
@@ -488,10 +467,6 @@ namespace o3dgc
 
         long minValue = 0;
         const unsigned long size = numIntArray * dimIntArray;
-#ifdef DEBUG_VERBOSE
-        printf("FloatArray (%i, %i)\n", numIntArray, dimIntArray);
-        fprintf(g_fileDebugSC3DMCEnc, "FloatArray (%i, %i)\n", numIntArray, dimIntArray);
-#endif //DEBUG_VERBOSE
         for(unsigned long i = 0; i < size; ++i)
         {
             if (minValue > intArray[i]) 
@@ -544,10 +519,6 @@ namespace o3dgc
                 for (unsigned long i = 0; i < dimIntArray; i++) 
                 {
                     EncodeUIntACEGC(intArray[v*dimIntArray+i] - minValue, ace, mModelValues, bModel0, bModel1, M);
-#ifdef DEBUG_VERBOSE
-                    printf("%i\n", intArray[v*dimIntArray+i]);
-                    fprintf(g_fileDebugSC3DMCEnc, "%i\n", intArray[v*dimIntArray+i]);
-#endif //DEBUG_VERBOSE
                 }
             }
             unsigned long encodedBytes = ace.stop_encoder();
@@ -557,20 +528,14 @@ namespace o3dgc
             }
         }
         bstream.WriteUInt32(start, bstream.GetSize() - start, m_streamType);
-#ifdef DEBUG_VERBOSE
-                    printf("Size %i\n", bstream.GetSize() - start);
-                    fprintf(g_fileDebugSC3DMCEnc,"Size %i\n", bstream.GetSize() - start);
-#endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
-    O3DGCErrorCode SC3DMCEncoder::EncodePayload(const SC3DMCEncodeParams & params, 
-                                                const IndexedFaceSet & ifs, 
+    template <class T>
+    O3DGCErrorCode SC3DMCEncoder<T>::EncodePayload(const SC3DMCEncodeParams & params, 
+                                                const IndexedFaceSet<T> & ifs, 
                                                 BinaryStream & bstream)
     {
 
-#ifdef DEBUG_VERBOSE
-        g_fileDebugSC3DMCEnc = fopen("tfans_enc_main.txt", "w");
-#endif //DEBUG_VERBOSE
         // encode triangle list        
         m_triangleListEncoder.SetStreamType(params.GetStreamType());
         m_triangleListEncoder.Encode(ifs.GetCoordIndex(), ifs.GetNCoordIndex(), ifs.GetNCoord(), bstream);
@@ -608,12 +573,9 @@ namespace o3dgc
         {
             EncodeIntArray(ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), params.GetIntAttributePredMode(a), bstream);
         }
-
-#ifdef DEBUG_VERBOSE
-        fclose(g_fileDebugSC3DMCEnc);
-#endif //DEBUG_VERBOSE
         return O3DGC_OK;
     }
 }
+#endif // O3DGC_SC3DMC_ENCODER_INL
 
 
