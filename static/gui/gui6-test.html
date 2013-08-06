@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!-- 
+The MIT License (MIT)
+
+Copyright (c) 2013 Rémi Arnaud - Advanced Micro Devices, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+ -->
+<head>
+    <script type="text/javascript" src="/gui/gui6.js"></script>
+    <script type="text/javascript" src="renderer.js"></script>
+    <script type="text/javascript" src="/loaders/collada.js"></script>
+    <script type="text/javascript" src="/loaders/gltf.js"></script>
+    <script type="text/javascript">
+    // initialize Application
+    
+    $(function () {
+        var layout = GUI.layout();
+        win = GUI.window('UI', 'center');
+        var viewer = GUI.window('Canvas', 'west');
+
+		var handler = new Array("0","javascript:console.log(&quot;menu2 onclicked&quot;)");
+		var item = new Array("Console","Menu2");
+		GUI.addMenu(item,handler,"0","menu");
+		
+		var sub_item = new Array("Erreur","debug","Warn","log");
+		var handler1 = new Array("javascript:console.error(&quot;error&quot;)","javascript:console.debug(&quot;debug&quot;)","javascript:console.warn(&quot;warning&quot;)","javascript:console.log(&quot;log&quot;)");
+       	GUI.addMenu(sub_item,handler1,"0_1","sub-menu-1");
+		
+       	
+       	var sub_sub_item = new Array("SubSubMenu1","SubSubMenu2");
+        GUI.addMenu(sub_sub_item,handler,"0_1_1","sub-sub-menu-1");
+        GUI.addMenu(sub_sub_item,handler,"0_1_2","sub-sub-menu-2");
+        GUI.addMenu(sub_sub_item,handler,"0_2_1","sub-sub-menu-3");
+		
+        GUI.addMenu(sub_item,handler,"0_2","sub-menu-2");
+        
+        var item1 = new Array("newTry","olalall");
+        GUI.addElementMenu(item1,handler,"0");
+        GUI.addElementMenu(item1,handler,"0_1");
+        GUI.addElementMenu(item1,handler,"0_1_1");
+		
+		GUI.console(layout);
+        
+        layout.resizeAll();});
+
+        
+         </script>
+</head>
+<body></body>

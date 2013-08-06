@@ -1,0 +1,113 @@
+
+		/*.iconClosed{
+		background-image:url(/gui/img/icone_console.jpg) no-repeat !important;
+		background-size:15px !important;
+   		 width:15px;
+  		  height:15px;
+		}
+		
+		.iconOpen{
+		background-image:url(/gui/img/icone_console.jpg) no-repeat !important;
+		background-size:15px !important;
+    	width:15px;
+    	height:15px;
+		}*/
+
+		
+		.ui-resize-me{background-color: black !important;}
+		#content-accordion{height:55px !important;}
+		#console{/*background-color: yellow !important;*/height:25px;width:600px !important;display:block;overflow:hidden;margin-top:0px;overflow:hidden;}
+		#content-console{height:55px !important;padding-right:50px;width:600px !important;float: left;}
+		#blocConsole1 {
+   		float: left;
+		}
+		
+		#blocConsole2 {
+   		display:block;
+   		overflow:hidden;
+		}
+		
+	    #accordion{
+	    //width:500px;
+	    //position:absolute;
+		//bottom: 0px;
+	    background-color: black;
+	    }  
+	      
+	    .ui-widget {
+            font-size:10px;
+        }
+        .ui-widget-content {
+            border: 0 !important;
+        }
+        .ui-widget-header {
+            font-weight: normal;
+        }
+        .ui-resizable-helper {
+            border: 2px dotted #00F;
+        }
+        .ui-tabs .ui-tabs-panel {
+            padding: 0;
+        }
+        .ui-layout-content {
+            overflow: auto;
+            /* add scrolling to content-divs (panel-wrappers) */
+            border-top: 0 !important;
+            /* tab-buttons above this DIV already has a border-bottom */
+        }
+        /*
+        *  TAB-THEME ADJUSTMENTS
+        */
+        .ui-tabs-nav li {
+            white-space: nowrap;
+        }
+        .ui-tabs-nav li a {
+            font-size: 1em !important;
+            padding: 4px 1.5ex 3px !important;
+        }
+        .ui-tabs-panel {
+            font-size: 1em !important;
+            /*padding:      0 1em !important; -- this moves content to the right */
+        }
+        /*
+     *  WEST-PANE TABS
+     *
+     *  These tabs 'fill' the pane,
+     *  so the pane-border acts as the tab-border
+     */
+     
+     
+     
+        .ui-layout-pane {
+            padding: 0;
+            overflow: hidden;
+            border-width: 0;
+        }
+        .ui-layout-pane .ui-tabs-nav {
+            /* don"t need border or rounded corners - tabs "fill" the pane */
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+            padding-bottom: 0 !important;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        .ui-layout-north {
+            z-index : 9999;
+        }
+        .ui-layout-south {
+            border-top-width: 1px;
+        }
+        .ui-layout-resizer-west {
+            border-width: 0 1px;
+        }
+                
+        .ui-layout-resizer-west, .ui-layout-resizer-west:hover {
+        	
+            background: url(/gui/img/resizable-w.gif) repeat-y center;
+        }
+<<<<<<< HEAD
+       
+=======
+>>>>>>> eed4f212e93f096aa3c1130ba4dadb947a493d98
+ 		
