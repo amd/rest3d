@@ -281,6 +281,18 @@ if (window.$ === undefined) {
         return $canvas[0];
     };
     
+     GUI.addIcon = function(_parent,_cssClass,_style){
+ 		var icon='';
+ 		if(_style){icon = '<span class="ui-icon '+_cssClass+'" style='+_style;}
+ 		else{icon='<span class="ui-icon '+_cssClass+'"';}
+ 		icon += '></span>';
+ 		console.debug(icon);
+ 		var $icon=$(icon);
+ 		_parent.append($icon);
+ 		return $icon};
+    
+    
+    
 	GUI.addMenu = function(_item,_link,_position,_id){
 		if (!_link || !_position || !_item) return console.error("function:menuAddElement: miss argument");
 		if(_item.length != _item.length) return console.error("function:menu invalid arguments, it must have same length");
@@ -436,9 +448,9 @@ if (window.$ === undefined) {
     	var that=this;
     	var $layout = $(
             '<div class="ui-layout-north" id="cssmenu"></div>'+
-            '<div class="ui-layout-west ui-widget-header" >'+
+            '<div class="ui-layout-west" >'+
             '</div>'+
-            '<div class="ui-layout-center ui-widget-header" >'+
+            '<div class="ui-layout-center" >'+
             '</div>'+
             '<div class="ui-layout-south ui-widget-header"><span style="font-size:10px; font-family:tahoma;">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</span></div>'
     	);
