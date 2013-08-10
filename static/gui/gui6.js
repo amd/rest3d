@@ -55,7 +55,23 @@ if (window.$ === undefined) {
     document.write('<link rel="stylesheet" href="/gui/themes/jquery.terminal.css" />');
 }
 
+function changeExposure()
+{
+	
+    var value = $("#exposureSlider").slider("value");
+    $("#exposureText").text(value + " f-stops ");
+    //Conduit.renderSetExposure(value);
+}
 
+function changeBloom()
+{
+    var bloomBias = $("#bloomBiasSlider").slider("value");
+    var bloomScale = $("#bloomScaleSlider").slider("value");
+    $("#bloomBiasText").html ( bloomBias + " bloom bias" );
+    $("#bloomScaleText").html ( bloomScale + " bloom scale" );
+    //Conduit.renderSetBloom(bloomBias,bloomScale); 
+    }
+       
 /***
   Require Underscore, if we're on the server, and it's not already present.
   var _ = root._;
@@ -111,10 +127,17 @@ if (window.$ === undefined) {
 			$(_parent).append($button);
         return $button
     };
-    GUI.label = function(_txt, _parent, _id) {
-        var label = '<p';
-        if (_id) label += ' id='+_id;
-        label += '>'+_txt+'</p>';
+   
+   GUI.label = function(_id,_txt, _parent,_style,_mode) {
+    	var label='';
+        if(_mode=="isolate"){
+        	label = '<p';
+       		if (_id) label += ' id= "p'+_id;
+        	label += '" >';}
+        label+='<span style="'+_style;
+        if (_id) label += '" id= "'+_id;
+        label+='">'+_txt+'</span>';
+        if(_mode=="isolate"){label+='</p>';}
     	var $label = $(label);
     	//$label.button().uniqueId();
 		if (!_parent)
@@ -122,7 +145,8 @@ if (window.$ === undefined) {
 		else 
 			$(_parent).append($label);
         return $label;
-    };
+    };    
+    
     GUI.tree = function(_tree, _parent, _callback, _id) {
         var cb = _callback;
         var tree = '<div';
@@ -251,6 +275,138 @@ if (window.$ === undefined) {
       
         return $tree;
     };
+
+
+	GUI.addNewTab = function(_idTabWindow,_idTab,_headerTitle,_contentHTML){
+		var headerTab = '<li><a href="#'+_idTab+'">'+_headerTitle+'</a></li>';
+		$headerTab=$(headerTab);
+		$("#header-"+_idTabWindow).append($headerTab);
+		var contentTab = '<div id="'+_idTab +'">';
+		if(_contentHTML){contentTab +=_contentHTML;}
+		contentTab += '</div>';
+		$contentTab=$(contentTab);
+		$("#content-"+_idTabWindow).append($contentTab);
+		$(".ui-layout-center").tabs("refresh");
+		return $contentTab;}
+			
+		//checked
+	GUI.addTabWindow = function(_parent,_idTab,_headerTitle,_contentHTML){
+		var tab = '<ul id="header-'+_idTab+'" ><li><a href="#'+_idTab+'">'+_headerTitle+'</a></li></ul>';
+		tab += '<div id="content-'+_idTab +'" class="ui-widget-content ui-layout-content ui-corner-top" >';
+		tab += '<div id="'+_idTab +'" class="content">';
+		if(_contentHTML){tab +=_contentHTML;}
+		tab += '</div></div>'
+		$tab=$(tab);
+		_parent.append($tab);
+		_parent.tabs();
+		return $tab;};
+		
+	 	 //checked	 	 
+ 	GUI.addSlider = function(_id,_parent,_min,_max,_step,_defaultValue, _style){
+		var slider='<div id="'+_id+'"'
+ 		if(_style){slider += 'style="'+_style+'" ';}
+ 		slider += '></div>';
+ 		var $slider=$(slider);
+ 		_parent.append($slider);
+ 		$("#"+_id).slider({  
+		    animate: true,
+		    min: _min,
+		    max: _max, 
+		    step: _step,
+		    value: _defaultValue}); 
+ 		return $slider;};
+ 		
+ 	//checked
+ 	GUI.addIcon = function(_parent,_cssClass,_style,_position){
+ 		var icon='';
+ 		if(_style){icon = '<span class="ui-icon '+_cssClass+'" style="'+_style+'"';}
+ 		else{icon='<span class="ui-icon '+_cssClass+'"';}
+ 		icon += '></span>';
+ 		var $icon=$(icon);
+ 		if(_position=="before"){_parent.prepend($icon);}
+ 		else{_parent.append($icon);}
+ 		return $icon};
+ 		
+ 		//checked
+ 	GUI.messageDialog = function(_id,_title,_HTMLtext){
+ 		var dialog = '<div id='+_id+' title='+_title+'>'+_HTMLtext+'</div>';
+ 		
+ 		var $dialog=$(dialog);
+ 		if($('.ui-layout-west').find('#'+_id).length){$('.ui-layout-west').appendTo($dialog);}
+ 		else{$('.ui-layout-west').append($dialog);}
+        $("#"+_id).dialog({
+	        resizable: true,
+	        height:140,
+	        modal: true });
+	    return $("#"+_id);};
+ 		
+ 		//checked
+ 	GUI.confirmDialog=function(_id,_title,_text,_titleConfirmButton,_callback){
+ 		var dialog = '<div id='+_id+' title='+_title+'><p></span><span style= "margin: 0 7px 20px 35px;" >'+_text+'</span></p></div>';
+ 		var $dialog=$(dialog);
+ 		$('.ui-layout-west').append($dialog);
+        $("#"+_id).dialog({
+	        resizable: false,
+	        height:140,
+	        width:250,
+	        modal: true,
+	        buttons: {
+	        Yes: function() {_callback;$( this ).dialog( "close" );},
+	        No: function() {$( this ).dialog( "close" );}}})
+		GUI.addIcon($("#"+_id+">p"),"ui-icon-alert","margin: 0 7px 0 100px;","before");
+	    $('.ui-dialog :button').blur();
+	    return $("#"+_id);};
+	    // checked except mod vertical
+	GUI.addStickyButton = function(_id,_items,_parent,_mode){   
+		var size_list = _items.length;
+		var stickyButton = '';
+		if(size_list!=1){stickyButton += '<div id="'+_id+'">';}
+		for(i=0;i<size_list;i++){
+			stickyButton += '<input type="checkbox" id="'+_id+'-'+_items[i]+'"';
+			stickyButton += '/><label for="'+_id+'-'+_items[i]+'">'+_items[i]+'</label>';}
+			if(size_list!=1){stickyButton += '</div>';}
+			var $stickyButton = $(stickyButton);
+			_parent.append($stickyButton);
+			if(size_list==1){$("#"+_id+'-'+_items[0]).button();}
+			else if(_mode=="vertical"){$("#"+_id).buttonsetvertical();}
+ 			else{$("#"+_id).buttonset();}
+			return $stickyButton;};
+			
+ 		//checked
+    GUI.addCheckBox = function(_id,_text,_parent,_style){
+		var checkBox = '<li id="'+_id+'" style="list-style:none;"><input type="checkbox"><span>'+_text+'</span></li>';
+		if(_parent){var $checkBox = $(checkBox);_parent.append($checkBox);return $checkBox;}
+		else{return checkBox;}};
+		
+   				
+ 	GUI.addStickyList = function(_id,_items,_parent,_mode){
+ 		var size_list = _items.length;
+ 		var stickyList='<form><div id="'+_id+'" >';
+ 		for(i=0;i<size_list;i++){
+ 			var tmp='';
+ 			if(!i) {tmp='checked="checked"';}
+ 			stickyList += '<input type="radio" id="'+_id+'-'+_items[i]+'" name="radio" '+tmp+' /><label for="'+_id+'-'+_items[i]+'">'+_items[i]+'</label>';}
+ 		stickyList += '</div></form>';
+		var $stickyList = $(stickyList);
+		_parent.append($stickyList);
+		if(_mode=="vertical"){$("#"+_id).buttonsetv();}
+		else{$("#"+_id).buttonset();}
+		return $stickyList;};	
+   		
+ 	  	  //checked
+ 	 GUI.addRadioList = function(_id,_items,_parent){
+ 	    var size_list = _items.length;
+ 		var radioList='<li id='+_id+'>';
+ 		for(i=0;i<size_list;i++){
+ 			var tmp="";
+ 			if(!i) {tmp="checked";}
+ 			radioList += '<input type="radio" name='+_id+' value='+_items[i]+' '+tmp+'> '+_items[i]+'<br>';}
+ 		radioList += '</li>';
+ 		if(_parent){var $radioList = $(radioList);_parent.append($radioList);return $radioList;}
+   		else{return radioList;}};
+
+
+
 
     GUI.canvas = function(_parent) {
     	$canvas = $('<canvas class="ui-resize-me" style="padding: 0; margin: 0;" ></canvas>');
@@ -450,7 +606,7 @@ if (window.$ === undefined) {
             '<div class="ui-layout-north" id="cssmenu"></div>'+
             '<div class="ui-layout-west" >'+
             '</div>'+
-            '<div class="ui-layout-center" >'+
+            '<div class="ui-layout-center ui-widget-header" >'+
             '</div>'+
             '<div class="ui-layout-south ui-widget-header"><span style="font-size:10px; font-family:tahoma;">&copy; R&eacute;mi Arnaud - Advanced Micro Devices, Inc. 2013</span></div>'
     	);
@@ -478,7 +634,7 @@ if (window.$ === undefined) {
                 onresize: GUI.resize,
         	},
         	west: {
-        		size: "70%",
+        		size: "76%",
         		resizerCursor:"move",
         		onresize: GUI.resize,
         	},

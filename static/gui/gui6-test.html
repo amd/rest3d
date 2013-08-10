@@ -32,8 +32,6 @@ THE SOFTWARE.
     
     $(function () {
         var layout = GUI.layout();
-        win = GUI.window('UI', 'center');
-        var viewer = GUI.window('Canvas', 'west');
 
 		var handler = new Array("0","javascript:console.log(&quot;menu2 onclicked&quot;)");
 		var item = new Array("Console","Menu2");
@@ -49,7 +47,7 @@ THE SOFTWARE.
         GUI.addMenu(sub_sub_item,handler,"0_1_2","sub-sub-menu-2");
         GUI.addMenu(sub_sub_item,handler,"0_2_1","sub-sub-menu-3");
 		
-        GUI.addMenu(sub_item,handler,"0_2","sub-menu-2");
+        GUI.addMenu(sub_item,handler1,"0_2","sub-menu-2");
         
         var item1 = new Array("newTry","olalall");
         GUI.addElementMenu(item1,handler,"0");
@@ -59,7 +57,88 @@ THE SOFTWARE.
         GUI.addIcon($(".has-sub .has-sub>a"),"ui-icon-triangle-1-e","float:right");
 		
 		GUI.console(layout);
-        
+		
+		var renderTab = GUI.addTabWindow($(".ui-layout-center"),"tabsoune","Render");
+			
+		GUI.label("exposureTitle","exposure = ",renderTab.find(".content"));
+		GUI.label("exposureText","0 f-stops",renderTab.find(".content"));
+		var exposurerSlide = GUI.addSlider("exposureSlider",renderTab.find(".content"),-8,8,0.1,0,"margin:5 5 5 5;background:white !important;");
+		exposurerSlide.width(250);
+		exposurerSlide.on("slidechange",changeExposure);
+		exposurerSlide.on("slide",changeExposure);
+		
+		GUI.label("bloomBiasTitle","bloomBias = ",renderTab.find(".content"));
+		GUI.label("bloomBiasText","0.9 bloom bias",renderTab.find(".content"));
+		var bloomBiasSlide = GUI.addSlider("bloomBiasSlider",renderTab.find(".content"),0,2,0.01,0.9,"margin:5 5 5 5;background:white !important;");
+		bloomBiasSlide.width(250);
+		bloomBiasSlide.on("slidechange",changeBloom);
+		bloomBiasSlide.on("slide",changeBloom);
+			
+		GUI.label("bloomScaleTitle","bloomScale = ",renderTab.find(".content"));
+		GUI.label("bloomScaleText","1.5 bloom scale",renderTab.find(".content"));
+		var bloomScaleSlide = GUI.addSlider("bloomScaleSlider",renderTab.find(".content"),0,8,0.1,1.5,"margin:5 5 5 5;background:white !important;");
+		bloomScaleSlide.width(250);
+		bloomScaleSlide.on("slidechange",changeBloom);
+		bloomScaleSlide.on("slide",changeBloom);
+		
+		GUI.label("solid"," --------------------------------------------------------- ",renderTab.find(".content"));	
+		GUI.addCheckBox("debugSetRenderFullScreen","Full Screen",renderTab.find(".content"));
+				
+		GUI.label("titreMenu","Back buffer resolution:",renderTab.find(".content"),"0","isolate");
+		GUI.button("Native",renderTab.find(".content"));
+		GUI.button("1280x720",renderTab.find(".content"));
+		GUI.button("860x640",renderTab.find(".content"));
+		GUI.button("720x480",renderTab.find(".content"));
+		GUI.label("jump_line","",renderTab.find(".content"),"0","isolate");
+		GUI.button("Load background image",renderTab.find(".content"));
+		GUI.label("jump_line","",renderTab.find(".content"),"0","isolate");
+		GUI.label("solid"," --------------------------------------------------------- ",renderTab.find(".content"));
+		GUI.label("jump_line","",renderTab.find(".content"),"0","isolate");
+		GUI.button("Load cube map",renderTab.find(".content"));
+		GUI.addCheckBox("renderSetFilmCurve","Film curve",renderTab.find(".content"));
+		GUI.addCheckBox("debugSetRenderGPass","Deferred",renderTab.find(".content"));
+		GUI.addCheckBox("renderSetAdaptiveSampling","Adaptive sampling",renderTab.find(".content"));
+		GUI.addCheckBox("renderSetDynamicLights","Dynamic lights",renderTab.find(".content"));
+		GUI.label("solid"," --------------------------------------------------------- ",renderTab.find(".content"));
+		GUI.addCheckBox("enablePickerAxes","Draw picker axes",renderTab.find(".content"));
+		GUI.addCheckBox("enablePickerGrid","Draw picker grid",renderTab.find(".content"));
+		GUI.label("solid"," --------------------------------------------------------- ",renderTab.find(".content"));
+		GUI.addCheckBox("debugSetRenderVSync","Draw enable vsync",renderTab.find(".content"));
+		GUI.label("solid"," --------------------------------------------------------- ",renderTab.find(".content"));
+				
+		console.debug("here a test of the others API's methods...");		
+	
+		GUI.addNewTab("tabsoune","material","Material","HAHAHAHAHHA");
+		
+		GUI.addNewTab("tabsoune","example","eg for mercy","Spicyyyyyyy");
+		
+		GUI.messageDialog("help","Help","Sed vel diam id libero <a>rutrum convallis</a>. Donec aliquet leo vel magna. Phasellus rhoncus faucibus ante. Etiam bibendum, enim faucibus aliquet rhoncus, arcu felis ultricies neque, sit amet auctor elit eros a lectus.");		
+		 	
+		GUI.confirmDialog("quitPanel","Leaving?","Are you sure you want to quit?","Quit",console.debug("dialogConfirm"));	/*,Conduit.coreExit()*/
+		
+				//GUI.addStickyButton = function(_id,_items,_parent,_mode)
+		layout.initContent("center");
+		layout.resizeAll();
+				
+		GUI.label("...","list sticky button",$(".ui-layout-west"),'',"isolate");
+		var egg = new Array("eg1","eg2","eg3","eg4","eg5");
+		GUI.addStickyButton("example1",egg,$(".ui-layout-west"));
+		
+			
+		GUI.label("...","one sticky button",$(".ui-layout-west"),'',"isolate");
+		var item = new Array("tefa");
+		GUI.addStickyButton("example2",item,$(".ui-layout-west"));
+			
+		/* bug from vertical plugin, need improvements		
+		GUI.label("...","list sticky button vertical",$(".ui-layout-west"),'',"isolate");
+		GUI.addStickyButton("example1",egg,$(".ui-layout-west"),"vertical");*/
+				
+		GUI.label("...","Sticky list Radio Buttons",$(".ui-layout-west"),'',"isolate");
+		var egg1 = new Array("eg1","eg2","eg3","eg4","eg5");
+		GUI.addStickyList("example2",egg1,$(".ui-layout-west"));
+		
+		GUI.label("...","Working on making those widgets in a vertical view...",$(".ui-layout-west"),'',"isolate");
+	        
         layout.resizeAll();});
 
         
