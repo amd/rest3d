@@ -74,6 +74,7 @@ OF SUCH DAMAGE.
 #define O3DGC_ARITHMETIC_CODEC
 
 #include <stdio.h>
+#include "o3dgcCommon.h"
 
 namespace o3dgc
 {
@@ -265,6 +266,72 @@ namespace o3dgc
       unsigned base, value, length;                     // arithmetic coding state
       unsigned buffer_size, mode;     // mode: 0 = undef, 1 = encoder, 2 = decoder
     };
+    inline long DecodeIntACEGC(Arithmetic_Codec & acd,
+                               Adaptive_Data_Model & mModelValues,
+                               Static_Bit_Model & bModel0,
+                               Adaptive_Bit_Model & bModel1,
+                               const unsigned long exp_k,
+                               const unsigned long M)
+    {
+        unsigned long uiValue = acd.decode(mModelValues);
+        if (uiValue == M) 
+        {
+            uiValue += acd.ExpGolombDecode(exp_k, bModel0, bModel1);
+        }
+        return UIntToInt(uiValue);
+    }
+    inline unsigned long DecodeUIntACEGC(Arithmetic_Codec & acd,
+                                         Adaptive_Data_Model & mModelValues,
+                                         Static_Bit_Model & bModel0,
+                                         Adaptive_Bit_Model & bModel1,
+                                         const unsigned long exp_k,
+                                         const unsigned long M)
+    {
+        unsigned long uiValue = acd.decode(mModelValues);
+        if (uiValue == M) 
+        {
+            uiValue += acd.ExpGolombDecode(exp_k, bModel0, bModel1);
+        }
+        return uiValue;
+    }
+
+    inline void EncodeIntACEGC(long predResidual, 
+                               Arithmetic_Codec & ace,
+                               Adaptive_Data_Model & mModelValues,
+                               Static_Bit_Model & bModel0,
+                               Adaptive_Bit_Model & bModel1,
+                               const unsigned long M)
+    {
+        unsigned long uiValue = IntToUInt(predResidual);
+        if (uiValue < M) 
+        {
+            ace.encode(uiValue, mModelValues);
+        }
+        else 
+        {
+            ace.encode(M, mModelValues);
+            ace.ExpGolombEncode(uiValue-M, 0, bModel0, bModel1);
+        }
+    }
+    inline void EncodeUIntACEGC(long predResidual, 
+                                Arithmetic_Codec & ace,
+                                Adaptive_Data_Model & mModelValues,
+                                Static_Bit_Model & bModel0,
+                                Adaptive_Bit_Model & bModel1,
+                                const unsigned long M)
+    {
+        unsigned long uiValue = (unsigned long) predResidual;
+        if (uiValue < M) 
+        {
+            ace.encode(uiValue, mModelValues);
+        }
+        else 
+        {
+            ace.encode(M, mModelValues);
+            ace.ExpGolombEncode(uiValue-M, 0, bModel0, bModel1);
+        }
+    }
+
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

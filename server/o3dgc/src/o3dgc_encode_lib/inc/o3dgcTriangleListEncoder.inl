@@ -186,7 +186,7 @@ namespace o3dgc
         m_numVertices             = 0;
         m_triangles               = 0;
         m_maxSizeVertexToTriangle = 0;
-        m_streamType              = O3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
+        m_streamType              = O3DGC_STREAM_TYPE_UNKOWN;
     }
     template <class T>
     TriangleListEncoder<T>::~TriangleListEncoder()
@@ -291,7 +291,7 @@ namespace o3dgc
     }
     template <class T>
     O3DGCErrorCode TriangleListEncoder<T>::Encode(const T * const triangles, 
-                                                  const unsigned long * const matIDs,
+                                                  const unsigned long * const indexBufferIDs,
                                                   const long numTriangles,
                                                   const long numVertices, 
                                                   BinaryStream & bstream)
@@ -301,22 +301,22 @@ namespace o3dgc
         
         Init(triangles, numTriangles, numVertices);
         unsigned char mask = 0;
-        bool encodeTrianglesOrder = (matIDs != 0);
+        bool encodeTrianglesOrder = (indexBufferIDs != 0);
 
         
         if (encodeTrianglesOrder)
         {
-            long numMatIDs = 0;
+            long numBufferIDs = 0;
             for (long t = 0; t < numTriangles; t++)
             {
-                if (numMatIDs <= (long) matIDs[t])
+                if (numBufferIDs <= (long) indexBufferIDs[t])
                 {
-                    ++numMatIDs;
-                    assert(numMatIDs <= numTriangles);
+                    ++numBufferIDs;
+                    assert(numBufferIDs <= numTriangles);
                 }
-                ++m_count[matIDs[t]+1];
+                ++m_count[indexBufferIDs[t]+1];
             }
-            for (long i = 2; i <= numMatIDs; i++)
+            for (long i = 2; i <= numBufferIDs; i++)
             {
                 m_count[i] += m_count[i-1];
             }
@@ -348,7 +348,7 @@ namespace o3dgc
             for (long i = 0; i < numTriangles; ++i)
             {
                 t = m_invTMap[i];
-                m_tmap[t] = m_count[ matIDs[t] ]++;
+                m_tmap[t] = m_count[ indexBufferIDs[t] ]++;
                 pred = m_tmap[t] - prev;
                 m_ctfans.PushTriangleIndex(pred);
                 prev = m_tmap[t] + 1;

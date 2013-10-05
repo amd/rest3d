@@ -51,9 +51,9 @@ namespace o3dgc
         //! Destructor.
                                 ~BinaryStream(void){};
 
-        void                    WriteFloat32(float value, O3DGCSC3DMCStreamType streamType)
+        void                    WriteFloat32(float value, O3DGCStreamType streamType)
                                 {
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         WriteFloat32ASCII(value);
                                     }
@@ -62,9 +62,9 @@ namespace o3dgc
                                         WriteFloat32Bin(value);
                                     }
                                 }
-        void                    WriteUInt32(unsigned long position, unsigned long value, O3DGCSC3DMCStreamType streamType)
+        void                    WriteUInt32(unsigned long position, unsigned long value, O3DGCStreamType streamType)
                                 {
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         WriteUInt32ASCII(position, value);
                                     }
@@ -73,9 +73,9 @@ namespace o3dgc
                                         WriteUInt32Bin(position, value);
                                     }
                                 }
-        void                    WriteUInt32(unsigned long value, O3DGCSC3DMCStreamType streamType)
+        void                    WriteUInt32(unsigned long value, O3DGCStreamType streamType)
                                 {
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         WriteUInt32ASCII(value);
                                     }
@@ -84,9 +84,9 @@ namespace o3dgc
                                         WriteUInt32Bin(value);
                                     }
                                 }
-        void                    WriteUChar(unsigned int position, unsigned char value, O3DGCSC3DMCStreamType streamType)
+        void                    WriteUChar(unsigned int position, unsigned char value, O3DGCStreamType streamType)
                                 {
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         WriteUInt32ASCII(position, value);
                                     }
@@ -95,9 +95,9 @@ namespace o3dgc
                                         WriteUInt32Bin(position, value);
                                     }
                                 }
-        void                    WriteUChar(unsigned char value, O3DGCSC3DMCStreamType streamType)
+        void                    WriteUChar(unsigned char value, O3DGCStreamType streamType)
                                 {
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         WriteUCharASCII(value);
                                     }
@@ -106,10 +106,10 @@ namespace o3dgc
                                         WriteUChar8Bin(value);
                                     }
                                 }
-        float                   ReadFloat32(unsigned long & position, O3DGCSC3DMCStreamType streamType) const
+        float                   ReadFloat32(unsigned long & position, O3DGCStreamType streamType) const
                                 {
                                     float value;
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         value = ReadFloat32ASCII(position);
                                     }
@@ -119,10 +119,10 @@ namespace o3dgc
                                     }
                                     return value;
                                 }
-        unsigned long           ReadUInt32(unsigned long & position, O3DGCSC3DMCStreamType streamType) const
+        unsigned long           ReadUInt32(unsigned long & position, O3DGCStreamType streamType) const
                                 {
                                     unsigned long value;
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         value = ReadUInt32ASCII(position);
                                     }
@@ -132,10 +132,10 @@ namespace o3dgc
                                     }
                                     return value;
                                 }
-        unsigned char           ReadUChar(unsigned long & position, O3DGCSC3DMCStreamType streamType) const
+        unsigned char           ReadUChar(unsigned long & position, O3DGCStreamType streamType) const
                                 {
                                     unsigned char value;
-                                    if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+                                    if (streamType == O3DGC_STREAM_TYPE_ASCII)
                                     {
                                         value = ReadUCharASCII(position);
                                     }

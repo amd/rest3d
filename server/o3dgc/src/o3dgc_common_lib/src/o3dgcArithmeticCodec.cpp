@@ -440,7 +440,9 @@ namespace o3dgc
         }
                                                                // compute products
         x = M.distribution[s] * length;
-        if (s != M.last_symbol) y = M.distribution[s+1] * length;
+        if (s != M.last_symbol) {
+            y = M.distribution[s+1] * length;
+        }
       }
 
       else {                                  // decode using only multiplications
@@ -502,7 +504,7 @@ namespace o3dgc
                                       unsigned char * user_buffer)
     {
                                                       // test for reasonable sizes
-      if ((max_code_bytes < 1) || (max_code_bytes > 0x10000000U)) // updated by K. Mammou
+      if (!max_code_bytes)// || (max_code_bytes > 0x10000000U)) // updated by K. Mammou
       {
         AC_Error("invalid codec buffer size");
       }
