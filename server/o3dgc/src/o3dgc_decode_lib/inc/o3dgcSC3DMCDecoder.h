@@ -47,7 +47,7 @@ namespace o3dgc
                                         m_quantFloatArraySize = 0;
                                         m_normals             = 0;
                                         m_normalsSize         = 0;
-                                        m_streamType          = O3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
+                                        m_streamType          = O3DGC_STREAM_TYPE_UNKOWN;
                                     };
         //! Destructor.
                                     ~SC3DMCDecoder(void)
@@ -61,7 +61,10 @@ namespace o3dgc
         //!                         
         O3DGCErrorCode              DecodePlayload(IndexedFaceSet<T> & ifs,
                                                   const BinaryStream & bstream);
-        const SC3DMCStats &         GetStats() const { return m_stats;}
+        const SC3DMCStats &         GetStats()    const { return m_stats;}
+        unsigned long               GetIterator() const { return m_iterator;}
+        O3DGCErrorCode              SetIterator(unsigned long iterator) { m_iterator = iterator;}
+        
 
     private:                        
         O3DGCErrorCode              DecodeFloatArray(Real * const floatArray,
@@ -82,10 +85,12 @@ namespace o3dgc
                                                        const Real * const maxfloatArray,
                                                        unsigned long nQBits);
         O3DGCErrorCode              DecodeIntArray(long * const intArray, 
-                                                 unsigned long numIntArraySize,
-                                                 unsigned long dimIntArraySize,
-                                                 unsigned long stride,
-                                                 const BinaryStream & bstream);
+                                                   unsigned long numIntArraySize,
+                                                   unsigned long dimIntArraySize,
+                                                   unsigned long stride,
+                                                   const IndexedFaceSet<T> & ifs,
+                                                   O3DGCSC3DMCPredictionMode & predMode,
+                                                   const BinaryStream & bstream);
         O3DGCErrorCode              ProcessNormals(const IndexedFaceSet<T> & ifs);
 
         unsigned long               m_iterator;
@@ -94,12 +99,11 @@ namespace o3dgc
         TriangleListDecoder<T>      m_triangleListDecoder;
         long *                      m_quantFloatArray;
         unsigned long               m_quantFloatArraySize;
-//        Vector<unsigned char>       m_predictors;
         Vector<char>                m_orientation;
         Real *                      m_normals;
         unsigned long               m_normalsSize;
         SC3DMCStats                 m_stats;
-        O3DGCSC3DMCStreamType       m_streamType;
+        O3DGCStreamType             m_streamType;
     };
 }
 #include "o3dgcSC3DMCDecoder.inl"    // template implementation

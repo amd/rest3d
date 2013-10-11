@@ -4,7 +4,7 @@ add_executable(test_o3dgc ${PROJECT_CPP_FILES} ${PROJECT_C_FILES} ${PROJECT_INC_
 
 include_directories("${${PROJECT_NAME}_SOURCE_DIR}/../o3dgc_decode_lib/inc" "${${PROJECT_NAME}_SOURCE_DIR}/../o3dgc_encode_lib/inc" "${${PROJECT_NAME}_SOURCE_DIR}/../o3dgc_common_lib/inc")
 
-#target_link_libraries(test_o3dgc o3dgc_dec_lib o3dgc_enc_lib o3dgc_common_lib)
+target_link_libraries(test_o3dgc o3dgc_dec_lib o3dgc_enc_lib o3dgc_common_lib)
 IF(WIN32)
 target_link_libraries(test_o3dgc o3dgc_common_lib)
 ELSEIF(APPLE)

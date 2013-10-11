@@ -237,13 +237,13 @@ namespace o3dgc
         bstream.WriteUInt32Bin(start, bstream.GetSize() - start);
         return O3DGC_OK;
     }
-    O3DGCErrorCode    CompressedTriangleFans::Save(BinaryStream & bstream, bool encodeTrianglesOrder, O3DGCSC3DMCStreamType streamType) 
+    O3DGCErrorCode    CompressedTriangleFans::Save(BinaryStream & bstream, bool encodeTrianglesOrder, O3DGCStreamType streamType) 
     {
 #ifdef DEBUG_VERBOSE
         g_fileDebugTF = fopen("SaveIntACEGC_new.txt", "w");
 #endif //DEBUG_VERBOSE
 
-        if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        if (streamType == O3DGC_STREAM_TYPE_ASCII)
         {
             SaveUIntData(m_numTFANs  , bstream);
             SaveUIntData(m_degrees   , bstream);
@@ -436,12 +436,12 @@ namespace o3dgc
     O3DGCErrorCode    CompressedTriangleFans::Load(const BinaryStream & bstream,
                                                    unsigned long & iterator, 
                                                    bool decodeTrianglesOrder,
-                                                   O3DGCSC3DMCStreamType streamType) 
+                                                   O3DGCStreamType streamType) 
     {
 #ifdef DEBUG_VERBOSE
         g_fileDebugTF = fopen("Load_new.txt", "w");
 #endif //DEBUG_VERBOSE
-        if (streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)
+        if (streamType == O3DGC_STREAM_TYPE_ASCII)
         {
             LoadUIntData(m_numTFANs  , bstream, iterator);
             LoadUIntData(m_degrees   , bstream, iterator);

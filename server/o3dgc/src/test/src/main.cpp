@@ -36,7 +36,12 @@ THE SOFTWARE.
 #include "o3dgcSC3DMCEncoder.h"
 #include "o3dgcSC3DMCDecoder.h"
 #include "o3dgcTimer.h"
+#include "o3dgcDVEncodeParams.h"
+#include "o3dgcDynamicVectorEncoder.h"
+#include "o3dgcDynamicVectorDecoder.h"
 
+//#define ADD_FAKE_ANIMATION_WEIGHTS
+//#define TEST_DYNAMIC_VECTOR_ENCODING
 
 
 #ifdef WIN32
@@ -50,7 +55,7 @@ using namespace o3dgc;
 class IVec3Cmp 
 {
    public:
-      bool operator()(const Vec3<Index> a,const Vec3<Index> b) 
+      bool operator()(const Vec3<unsigned long> a,const Vec3<unsigned long> b) 
       { 
           if (a.X() != b.X())
           {
@@ -87,18 +92,25 @@ bool LoadOBJ(const std::string & fileName,
              std::vector< Vec3<Real> > & upoints,
              std::vector< Vec2<Real> > & utexCoords,
              std::vector< Vec3<Real> > & unormals,
-             std::vector< Vec3<Index> > & triangles,
-             std::vector< unsigned long > & matIDs,
+             std::vector< Vec3<unsigned long> > & triangles,
+             std::vector< unsigned long > & indexBufferIDs,
              std::vector< Material > & materials,
              std::string & materialLib);
+
+bool LoadIFS(const std::string & fileName, 
+             std::vector< Vec3<Real> > & points,
+             std::vector< Vec2<Real> > & texCoords,
+             std::vector< Vec3<Real> > & normals,
+             std::vector< Vec3<unsigned long> > & triangles,
+             std::vector< unsigned long > & indexBufferIDs);
 
 bool SaveOBJ(const std::string & fileName, 
              const std::vector< Vec3<Real> > & points,
              const std::vector< Vec2<Real> > & texCoords,
              const std::vector< Vec3<Real> > & normals,
-             const std::vector< Vec3<Index> > & triangles,
+             const std::vector< Vec3<unsigned long> > & triangles,
              const std::vector< Material > & materials,
-             const std::vector< unsigned long > matIDs,
+             const std::vector< unsigned long > indexBufferIDs,
              const std::string & materialLib);
 
 bool LoadMaterials(const std::string & fileName, 
@@ -108,9 +120,11 @@ bool LoadMaterials(const std::string & fileName,
 bool SaveMaterials(const std::string & fileName, 
                    const std::vector< Material > & materials, 
                    const std::string & materialLib);
+bool SaveIFS(const std::string & fileName, 
+             const IndexedFaceSet<unsigned long> & ifs);
+bool Check(const IndexedFaceSet<unsigned long> & ifs);
 
-
-int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnormal, O3DGCSC3DMCStreamType streamType)
+int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnormal, O3DGCStreamType streamType)
 {
     std::string folder;
     long found = (long) fileName.find_last_of(PATH_SEP);
@@ -127,16 +141,30 @@ int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnor
     std::vector< Vec3<Real> > points;
     std::vector< Vec3<Real> > normals;
     std::vector< Vec2<Real> > texCoords;
-    std::vector< Vec3<Index> > triangles;
-    std::vector< unsigned long > matIDs;
+    std::vector< Vec3<unsigned long> > triangles;
+    std::vector< unsigned long > indexBufferIDs;
     std::vector< Material > materials;
+
     std::string materialLib;
     std::cout << "Loading " << fileName << " ..." << std::endl;
-    bool ret = LoadOBJ(fileName, points, texCoords, normals, triangles, matIDs, materials, materialLib);
-    if (!ret)
+    bool ret;
+    if (fileName.find(".obj") != std::string::npos )
     {
-        std::cout << "Error: LoadOBJ()\n" << std::endl;
-        return -1;
+        ret = LoadOBJ(fileName, points, texCoords, normals, triangles, indexBufferIDs, materials, materialLib);
+        if (!ret)
+        {
+            std::cout << "Error: LoadOBJ()\n" << std::endl;
+            return -1;
+        }
+    }
+    else
+    {
+        ret = LoadIFS(fileName, points, texCoords, normals, triangles, indexBufferIDs);
+        if (!ret)
+        {
+            std::cout << "Error: LoadIFS()\n" << std::endl;
+            return -1;
+        }
     }
     if (points.size() == 0 || triangles.size() == 0)
     {
@@ -155,45 +183,117 @@ int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnor
         std::cout << "Error: SaveMatrials()\n" << std::endl;
         return -1;
     }
+
+#ifdef ADD_FAKE_ANIMATION_WEIGHTS
+    std::vector< Real > weights;
+    std::vector< long > jointIDs;
+    const unsigned int nV = points.size();
+    const unsigned int numJointsPerVertex = 4;
+    const unsigned int qWeights = 8;
+    {
+        const unsigned int size = nV * numJointsPerVertex;
+        weights.resize(size);
+        jointIDs.resize(size);
+        for(unsigned int i = 0; i < size; ++i)
+        {
+            weights[i]  = (Real) (rand() % 1024) / 1024;
+            jointIDs[i] = rand() % numJointsPerVertex;
+        }
+    }
+#endif
+
+
 /*
-    ret = SaveOBJ("debug.obj", points, texCoords, normals, triangles, materials, matIDs, materialLib);
+    ret = SaveOBJ("debug.obj", points, texCoords, normals, triangles, materials, indexBufferIDs, materialLib);
     if (!ret)
     {
         std::cout << "Error: SaveOBJ()\n" << std::endl;
         return -1;
     }
 */
+
+
+
+    
     SC3DMCEncodeParams params;
     params.SetStreamType(streamType);
-    IndexedFaceSet<Index> ifs;
-    params.SetCoordQuantBits(qcoord);
-    params.SetNormalQuantBits(qnormal);
-    params.SetTexCoordQuantBits(qtexCoord);
+    IndexedFaceSet<unsigned long> ifs;
 
-    ifs.SetNCoord((unsigned long) points.size());
-    ifs.SetNNormal((unsigned long)normals.size());
-    ifs.SetNTexCoord((unsigned long)texCoords.size());
     ifs.SetNCoordIndex((unsigned long)triangles.size());
-
-    std::cout << "Mesh info "<< std::endl;
-    std::cout << "\t# coords    " << ifs.GetNCoord() << std::endl;
-    std::cout << "\t# normals   " << ifs.GetNNormal() << std::endl;
-    std::cout << "\t# texcoords " << ifs.GetNTexCoord() << std::endl;
-    std::cout << "\t# triangles " << ifs.GetNCoordIndex() << std::endl;
-
-    ifs.SetCoord((Real * const) & (points[0]));
-    ifs.SetCoordIndex((Index * const ) &(triangles[0]));
+    ifs.SetCoordIndex((unsigned long * const ) &(triangles[0]));
     if (materials.size() > 1)
     {
-        ifs.SetMatID((unsigned long * const ) &(matIDs[0]));
+        ifs.SetIndexBufferID((unsigned long * const ) &(indexBufferIDs[0]));
     }
+
+    params.SetCoordQuantBits(qcoord);
+    params.SetCoordPredMode(O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION);
+    ifs.SetNCoord((unsigned long) points.size());
+    ifs.SetCoord((Real * const) & (points[0]));
+
+    params.SetNormalQuantBits(qnormal);
+    ifs.SetNNormal((unsigned long)normals.size());
     if (normals.size() > 0)
     {
         ifs.SetNormal((Real * const) & (normals[0]));
+        params.SetNormalPredMode(O3DGC_SC3DMC_SURF_NORMALS_PREDICTION);
     }
+
+    unsigned int nIntAttributes   = 0;
+    unsigned int nFloatAttributes = 0;
     if (texCoords.size() > 0)
     {
-        ifs.SetTexCoord((Real * const ) & (texCoords[0]));
+        params.SetFloatAttributeQuantBits(nFloatAttributes, qtexCoord);
+        params.SetFloatAttributePredMode(nFloatAttributes, O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION);
+        ifs.SetNFloatAttribute(nFloatAttributes, texCoords.size());
+        ifs.SetFloatAttributeDim(nFloatAttributes, 2);
+        ifs.SetFloatAttributeType(nFloatAttributes, O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD);
+        ifs.SetFloatAttribute(nFloatAttributes, (Real * const ) & (texCoords[0]));
+        nFloatAttributes++;
+    }
+
+#ifdef ADD_FAKE_ANIMATION_WEIGHTS
+    if (weights.size() > 0)
+    {
+        params.SetFloatAttributeQuantBits(nFloatAttributes, qWeights);
+        params.SetFloatAttributePredMode(nFloatAttributes, O3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
+        ifs.SetNFloatAttribute(nFloatAttributes, weights.size() / numJointsPerVertex);
+        ifs.SetFloatAttributeDim(nFloatAttributes, numJointsPerVertex);
+        ifs.SetFloatAttributeType(nFloatAttributes, O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_WEIGHT);
+        ifs.SetFloatAttribute(nFloatAttributes, (Real * const ) & (weights[0]));
+        nFloatAttributes++;
+    }
+
+    if (jointIDs.size() > 0)
+    {
+        params.SetIntAttributePredMode(nIntAttributes, O3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
+        ifs.SetNIntAttribute(nIntAttributes, jointIDs.size() / numJointsPerVertex);
+        ifs.SetIntAttributeDim(nIntAttributes, numJointsPerVertex);
+        ifs.SetIntAttributeType(nIntAttributes, O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID);
+        ifs.SetIntAttribute(nIntAttributes, (long * const ) & (jointIDs[0]));
+        nIntAttributes++;
+    }
+#endif
+
+    params.SetNumFloatAttributes(nFloatAttributes);
+    ifs.SetNumFloatAttributes(nFloatAttributes);
+
+    params.SetNumIntAttributes(nIntAttributes);
+    ifs.SetNumIntAttributes(nIntAttributes);
+    
+
+
+    std::cout << "Mesh info "<< std::endl;
+    std::cout << "\t# triangles " << ifs.GetNCoordIndex() << std::endl;
+    std::cout << "\t# coords    " << ifs.GetNCoord() << std::endl;
+    std::cout << "\t# normals   " << ifs.GetNNormal() << std::endl;
+    for(unsigned int a = 0; a < ifs.GetNumFloatAttributes(); ++a)
+    {
+        std::cout << "\t# FloatAttribute[" << a << "] " << ifs.GetNFloatAttribute(a) << "," << ifs.GetFloatAttributeDim(a) <<" (" << ifs.GetFloatAttributeType(a) <<")"<< std::endl;
+    }
+    for(unsigned int a = 0; a < ifs.GetNumIntAttributes(); ++a)
+    {
+        std::cout << "\t# IntAttribute[" << a << "]  " << ifs.GetNIntAttribute(a) << "," << ifs.GetIntAttributeDim(a) << " (" << ifs.GetIntAttributeType(a) <<")"<< std::endl;
     }
 
     // compute min/max
@@ -201,8 +301,8 @@ int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnor
 
     BinaryStream bstream((unsigned long)points.size()*8);
 
-    
-    SC3DMCEncoder<Index> encoder;
+    SaveIFS("debug_enc.txt", ifs);
+    SC3DMCEncoder<unsigned long> encoder;
     Timer timer;
     timer.Tic();
     encoder.Encode(params, ifs, bstream);
@@ -223,10 +323,14 @@ int testEncode(const std::string & fileName, int qcoord, int qtexCoord, int qnor
     std::cout << "\t CoordIndex         " << stats.m_timeCoordIndex     << " ms, " << stats.m_streamSizeCoordIndex     <<" bytes (" << 8.0 * stats.m_streamSizeCoordIndex     / ifs.GetNCoord() <<" bpv)" <<std::endl;
     std::cout << "\t Coord              " << stats.m_timeCoord          << " ms, " << stats.m_streamSizeCoord          <<" bytes (" << 8.0 * stats.m_streamSizeCoord          / ifs.GetNCoord() <<" bpv)" <<std::endl;
     std::cout << "\t Normal             " << stats.m_timeNormal         << " ms, " << stats.m_streamSizeNormal         <<" bytes (" << 8.0 * stats.m_streamSizeNormal         / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t TexCoord           " << stats.m_timeTexCoord       << " ms, " << stats.m_streamSizeTexCoord       <<" bytes (" << 8.0 * stats.m_streamSizeTexCoord       / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Color              " << stats.m_timeColor          << " ms, " << stats.m_streamSizeColor          <<" bytes (" << 8.0 * stats.m_streamSizeColor          / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Float Attributes   " << stats.m_timeFloatAttribute << " ms, " << stats.m_streamSizeFloatAttribute <<" bytes (" << 8.0 * stats.m_streamSizeFloatAttribute / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Integer Attributes " << stats.m_timeFloatAttribute << " ms, " << stats.m_streamSizeFloatAttribute <<" bytes (" << 8.0 * stats.m_streamSizeFloatAttribute / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    for(unsigned int a = 0; a < ifs.GetNumFloatAttributes(); ++a)
+    {
+        std::cout << "\t# FloatAttribute[" << a << "] " << stats.m_timeFloatAttribute[a] << " ms, " << stats.m_streamSizeFloatAttribute[a] <<" bytes (" << 8.0 * stats.m_streamSizeFloatAttribute[a] / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    }
+    for(unsigned int a = 0; a < ifs.GetNumIntAttributes(); ++a)
+    {
+        std::cout << "\t# IntAttribute[" << a << "] " << stats.m_timeIntAttribute[a] << " ms, " << stats.m_streamSizeIntAttribute[a] <<" bytes (" << 8.0 * stats.m_streamSizeIntAttribute[a] / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    }
 
     return 0;
 }
@@ -248,12 +352,13 @@ int testDecode(std::string & fileName)
 
     std::vector< Vec3<Real> > points;
     std::vector< Vec3<Real> > normals;
-    std::vector< Vec2<Real> > colors;
     std::vector< Vec2<Real> > texCoords;
-    std::vector< Vec3<Index> > triangles;
-    std::vector< unsigned long > matIDs;
+    std::vector< Vec3<unsigned long> > triangles;
+    std::vector< unsigned long > indexBufferIDs;
     std::vector< Material > materials;
     std::string materialLib;
+    std::vector< Real > weights;
+    std::vector< long > jointIDs;
 
     std::string matFileName = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + ".mat";
     bool ret = LoadMaterials(matFileName.c_str(), materials, materialLib);
@@ -264,14 +369,14 @@ int testDecode(std::string & fileName)
         for(size_t i = 0; i < numMaterials; ++i)
         {
             n = materials[i].m_numTriangles + shift;
-            matIDs.resize(n, materials[i].m_id);
+            indexBufferIDs.resize(n, materials[i].m_id);
             shift = n;
         }
     }
     
 
     BinaryStream bstream;
-    IndexedFaceSet<Index> ifs;
+    IndexedFaceSet<unsigned long> ifs;
 
 
     FILE * fin = fopen(fileName.c_str(), "rb");
@@ -292,7 +397,7 @@ int testDecode(std::string & fileName)
     fclose(fin);
     std::cout << "Bitstream size (bytes) " << bstream.GetSize() << std::endl;
 
-    SC3DMCDecoder<Index> decoder;
+    SC3DMCDecoder<unsigned long> decoder;
     // load header
     Timer timer;
     timer.Tic();
@@ -302,32 +407,52 @@ int testDecode(std::string & fileName)
 
     // allocate memory
     triangles.resize(ifs.GetNCoordIndex());
-    ifs.SetCoordIndex((Index * const ) &(triangles[0]));    
+    ifs.SetCoordIndex((unsigned long * const ) &(triangles[0]));
 
     points.resize(ifs.GetNCoord());
-    ifs.SetCoord((Real * const ) &(points[0]));    
+    ifs.SetCoord((Real * const ) &(points[0]));
 
     if (ifs.GetNNormal() > 0)
     {
         normals.resize(ifs.GetNNormal());
         ifs.SetNormal((Real * const ) &(normals[0]));  
     }
-    if (ifs.GetNColor() > 0)
+    unsigned int nFloatAttributes = ifs.GetNumFloatAttributes();
+    for(unsigned int a  = 0; a < nFloatAttributes; ++a)
     {
-        colors.resize(ifs.GetNColor());
-        ifs.SetColor((Real * const ) &(colors[0]));  
+        if (ifs.GetFloatAttributeType(a) == O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD)
+        {
+            texCoords.resize(ifs.GetNFloatAttribute(a));
+            ifs.SetFloatAttribute(a, (Real * const ) &(texCoords[0]));
+        }
+        else if (ifs.GetFloatAttributeType(a) == O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_WEIGHT)
+        {
+            weights.resize(ifs.GetNFloatAttribute(a) * ifs.GetFloatAttributeDim(a));
+            ifs.SetFloatAttribute(a, (Real * const ) &(weights[0]));
+        }
     }
-    if (ifs.GetNTexCoord() > 0)
+    unsigned int nIntAttributes = ifs.GetNumIntAttributes();
+    for(unsigned int a  = 0; a < nIntAttributes; ++a)
     {
-        texCoords.resize(ifs.GetNTexCoord());
-        ifs.SetTexCoord((Real * const ) &(texCoords[0]));
+        if (ifs.GetIntAttributeType(a) == O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID)
+        {
+            jointIDs.resize(ifs.GetNIntAttribute(a) * ifs.GetIntAttributeDim(a));
+            ifs.SetIntAttribute(a, (long * const ) &(jointIDs[0]));
+        }
     }
 
     std::cout << "Mesh info "<< std::endl;
+    std::cout << "\t# triangles " << ifs.GetNCoordIndex() << std::endl;
     std::cout << "\t# coords    " << ifs.GetNCoord() << std::endl;
     std::cout << "\t# normals   " << ifs.GetNNormal() << std::endl;
-    std::cout << "\t# texcoords " << ifs.GetNTexCoord() << std::endl;
-    std::cout << "\t# triangles " << ifs.GetNCoordIndex() << std::endl;
+    for(unsigned int a = 0; a < ifs.GetNumFloatAttributes(); ++a)
+    {
+        std::cout << "\t# FloatAttribute[" << a << "] " << ifs.GetNFloatAttribute(a) << "," << ifs.GetFloatAttributeDim(a) <<" (" << ifs.GetFloatAttributeType(a) <<")"<< std::endl;
+    }
+    for(unsigned int a = 0; a < ifs.GetNumIntAttributes(); ++a)
+    {
+        std::cout << "\t# IntAttribute[" << a << "]  " << ifs.GetNIntAttribute(a) << "," << ifs.GetIntAttributeDim(a) << " (" << ifs.GetIntAttributeType(a) <<")"<< std::endl;
+    }
 
     // decode mesh
     timer.Tic();
@@ -337,23 +462,35 @@ int testDecode(std::string & fileName)
 
     std::cout << "Details" << std::endl;
     const SC3DMCStats & stats = decoder.GetStats();
-    std::cout << "\t CoordIndex         " << stats.m_timeCoordIndex     << " ms, " << stats.m_streamSizeCoordIndex     <<" bytes (" << 8.0*stats.m_streamSizeCoordIndex     / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Coord              " << stats.m_timeCoord          << " ms, " << stats.m_streamSizeCoord          <<" bytes (" << 8.0*stats.m_streamSizeCoord          / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Normal             " << stats.m_timeNormal         << " ms, " << stats.m_streamSizeNormal         <<" bytes (" << 8.0*stats.m_streamSizeNormal         / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t TexCoord           " << stats.m_timeTexCoord       << " ms, " << stats.m_streamSizeTexCoord       <<" bytes (" << 8.0*stats.m_streamSizeTexCoord       / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Color              " << stats.m_timeColor          << " ms, " << stats.m_streamSizeColor          <<" bytes (" << 8.0*stats.m_streamSizeColor          / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Float Attributes   " << stats.m_timeFloatAttribute << " ms, " << stats.m_streamSizeFloatAttribute <<" bytes (" << 8.0*stats.m_streamSizeFloatAttribute / ifs.GetNCoord() <<" bpv)" <<std::endl;
-    std::cout << "\t Integer Attributes " << stats.m_timeFloatAttribute << " ms, " << stats.m_streamSizeFloatAttribute <<" bytes (" << 8.0*stats.m_streamSizeFloatAttribute / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    std::cout << "\t CoordIndex         " << stats.m_timeCoordIndex     << " ms, " << stats.m_streamSizeCoordIndex     <<" bytes (" << 8.0 * stats.m_streamSizeCoordIndex     / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    std::cout << "\t Coord              " << stats.m_timeCoord          << " ms, " << stats.m_streamSizeCoord          <<" bytes (" << 8.0 * stats.m_streamSizeCoord          / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    std::cout << "\t Normal             " << stats.m_timeNormal         << " ms, " << stats.m_streamSizeNormal         <<" bytes (" << 8.0 * stats.m_streamSizeNormal         / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    for(unsigned int a = 0; a < ifs.GetNumFloatAttributes(); ++a)
+    {
+        std::cout << "\t# FloatAttribute[" << a << "] " << stats.m_timeFloatAttribute[a] << " ms, " << stats.m_streamSizeFloatAttribute[a] <<" bytes (" << 8.0 * stats.m_streamSizeFloatAttribute[a] / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    }
+    for(unsigned int a = 0; a < ifs.GetNumIntAttributes(); ++a)
+    {
+        std::cout << "\t# IntAttribute[" << a << "] " << stats.m_timeIntAttribute[a] << " ms, " << stats.m_streamSizeIntAttribute[a] <<" bytes (" << 8.0 * stats.m_streamSizeIntAttribute[a] / ifs.GetNCoord() <<" bpv)" <<std::endl;
+    }
     std::cout << "\t Reorder            " << stats.m_timeReorder        << " ms,  " << 0 <<" bytes (" << 0.0 <<" bpv)" <<std::endl;
 
     std::cout << "Saving " << outFileName << " ..." << std::endl;
 
-    ret = SaveOBJ(outFileName.c_str(), points, texCoords, normals, triangles, materials, matIDs, materialLib);
+    SaveIFS("debug_dec.txt", ifs);
+    ret = SaveOBJ(outFileName.c_str(), points, texCoords, normals, triangles, materials, indexBufferIDs, materialLib);
     if (!ret)
     {
         std::cout << "Error: SaveOBJ()\n" << std::endl;
         return -1;
     }
+    ret = Check(ifs);
+    if (!ret)
+    {
+        std::cout << "Error: SaveOBJ()\n" << std::endl;
+        return -1;
+    }
+
     std::cout << "Done." << std::endl;
     return 0;
 }
@@ -365,14 +502,87 @@ enum Mode
     DECODE  = 2
 };
 
-int main(int argc, char * argv[])
+int testDynamicVectorCompression()
 {
-    Mode mode = UNKNOWN;
+    const std::string outFileName("lift.s3d");
+    const unsigned long N = 500;
+    const unsigned long D = 3;
+    const unsigned long S = D*N;
+    Real vectors[N*D];
+    Real max[D];
+    Real min[D];
+    const Real e = Real(6.30) / N;
+    Real x = Real(0.0);
+    long p = 0;
+    for(long n = 0; n < N; ++n)
+    {
+        vectors[p++] = cos(x);
+        vectors[p++] = sin(x);
+        vectors[p++] = sin(x) * cos(x);
+        x += e;
+    }
+
+    DynamicVector dynamicVector0;
+    dynamicVector0.SetVectors(vectors);
+    dynamicVector0.SetDimVector(3);
+    dynamicVector0.SetMax(max);
+    dynamicVector0.SetMin(min);
+    dynamicVector0.SetNVector(N);
+    dynamicVector0.SetStride(3);
+    dynamicVector0.ComputeMinMax(O3DGC_SC3DMC_MAX_ALL_DIMS);
+
+    DVEncodeParams params;
+    params.SetQuantBits(10);
+    params.SetStreamType(O3DGC_STREAM_TYPE_ASCII);
+//    params.SetStreamType(O3DGC_STREAM_TYPE_BINARY);
+    
+    BinaryStream bstream(N*D*16);
+
+    DynamicVectorEncoder encoder;
+
+    encoder.SetStreamType(O3DGC_STREAM_TYPE_BINARY);
+    Timer timer;
+    timer.Tic();
+    encoder.Encode(params, dynamicVector0, bstream);
+    timer.Toc();
+    std::cout << "Encode time (ms) " << timer.GetElapsedTime() << std::endl;
+
+
+    DynamicVector  dynamicVector1;
+    DynamicVectorDecoder decoder;
+    decoder.DecodeHeader(dynamicVector1, bstream);
+    dynamicVector1.SetStride(dynamicVector1.GetDimVector());
+
+    std::vector<Real> oDV;
+    std::vector<Real> oDVMin;
+    std::vector<Real> oDVMax;
+    oDV.resize(dynamicVector1.GetNVector() * dynamicVector1.GetDimVector());
+    oDVMin.resize(dynamicVector1.GetDimVector());
+    oDVMax.resize(dynamicVector1.GetDimVector());
+    dynamicVector1.SetVectors(& oDV[0]);
+    dynamicVector1.SetMin(& oDVMin[0]);
+    dynamicVector1.SetMax(& oDVMax[0]);
+    decoder.DecodePlayload(dynamicVector1, bstream);
+
+    FILE * fout = fopen(outFileName.c_str(), "wb");
+    if (!fout)
+    {
+        return -1;
+    }
+    fwrite(bstream.GetBuffer(), 1, bstream.GetSize(), fout);
+    fclose(fout);
+    std::cout << "Bitstream size (bytes) " << bstream.GetSize() << " (" << bstream.GetSize() * 8.0 / dynamicVector1.GetNVector() << " bpv)" <<std::endl;
+    return 0;
+}
+
+int testIFSCompression(int argc, char * argv[])
+{
+        Mode mode = UNKNOWN;
     std::string inputFileName;
     int qcoord    = 12;
     int qtexCoord = 10;
     int qnormal   = 8;
-    O3DGCSC3DMCStreamType streamType = O3DGC_SC3DMC_STREAM_TYPE_BINARY;
+    O3DGCStreamType streamType = O3DGC_STREAM_TYPE_BINARY;
     for(int i = 1; i < argc; ++i)
     {
         if ( !strcmp(argv[i], "-c"))
@@ -422,7 +632,7 @@ int main(int argc, char * argv[])
             {
                 if (!strcmp(argv[i], "ascii"))
                 {
-                    streamType = O3DGC_SC3DMC_STREAM_TYPE_ASCII;
+                    streamType = O3DGC_STREAM_TYPE_ASCII;
                 }
             }
         }
@@ -454,7 +664,7 @@ int main(int argc, char * argv[])
         std::cout << "   Coord Quant.    \t "<< qcoord << std::endl;
         std::cout << "   Normal Quant.   \t "<< qnormal << std::endl;
         std::cout << "   TexCoord Quant. \t "<< qtexCoord << std::endl;
-        std::cout << "   Stream Type     \t "<< ((streamType == O3DGC_SC3DMC_STREAM_TYPE_ASCII)? "ASCII" : "Binary") << std::endl;
+        std::cout << "   Stream Type     \t "<< ((streamType == O3DGC_STREAM_TYPE_ASCII)? "ASCII" : "Binary") << std::endl;
         ret = testEncode(inputFileName, qcoord, qtexCoord, qnormal, streamType);
     }
     else
@@ -468,12 +678,21 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
+
+int main(int argc, char * argv[])
+{
+#ifdef TEST_DYNAMIC_VECTOR_ENCODING
+    return testDynamicVectorCompression();
+#else
+    return testIFSCompression(argc, argv);
+#endif
+}
 bool LoadOBJ(const std::string & fileName, 
              std::vector< Vec3<Real> > & upoints,
              std::vector< Vec2<Real> > & utexCoords,
              std::vector< Vec3<Real> > & unormals,
-             std::vector< Vec3<Index> > & triangles,
-             std::vector< unsigned long > & matIDs,
+             std::vector< Vec3<unsigned long> > & triangles,
+             std::vector< unsigned long > & indexBufferIDs,
              std::vector< Material > & materials,
              std::string & materialLib) 
 {   
@@ -485,23 +704,23 @@ bool LoadOBJ(const std::string & fileName,
     {        
         char buffer[BufferSize];
         Real  x[3];
-        Index ip[3] = {(Index)(-1), (Index)(-1), (Index)(-1)};
-        Index in[3] = {(Index)(-1), (Index)(-1), (Index)(-1)};
-        Index it[3] = {(Index)(-1), (Index)(-1), (Index)(-1)};
-        unsigned long matID = 0;
+        unsigned long ip[3] = {(unsigned long)(-1), (unsigned long)(-1), (unsigned long)(-1)};
+        unsigned long in[3] = {(unsigned long)(-1), (unsigned long)(-1), (unsigned long)(-1)};
+        unsigned long it[3] = {(unsigned long)(-1), (unsigned long)(-1), (unsigned long)(-1)};
+        unsigned long indexBufferID = 0;
         unsigned long numMatID = 0;
         char * pch;
         char * str;
-        Index nv = 0;
-        Vec3<Index> vertex;
-        Vec3<Index> triangle;
+        unsigned long nv = 0;
+        Vec3<unsigned long> vertex;
+        Vec3<unsigned long> triangle;
         std::vector< Vec3<Real> > points;
         std::vector< Vec2<Real> > texCoords;
         std::vector< Vec3<Real> > normals;
-        std::map< Vec3<Index>, Index, IVec3Cmp > vertices;
+        std::map< Vec3<unsigned long>, unsigned long, IVec3Cmp > vertices;
         std::map< std::string, unsigned long > matMap;
         materialLib.clear();        
-        matIDs.clear();
+        indexBufferIDs.clear();
         materials.clear();
         while (!feof(fid)) 
         {
@@ -516,16 +735,16 @@ bool LoadOBJ(const std::string & fileName,
                 if ( !strcmp(pch, "usemtl") )
                 {
                     pch = strtok (NULL, " ");
-                    std::map< std::string, unsigned long >::iterator it = matMap.find(pch);                    
+                    std::map< std::string, unsigned long >::iterator it = matMap.find(pch);
                     if ( it == matMap.end() )
                     {
-                        matID          = numMatID++;
-                        matMap[pch]    = matID;
-                        materials.push_back(Material(matID, 0, pch));
+                        indexBufferID  = numMatID++;
+                        matMap[pch]    = indexBufferID;
+                        materials.push_back(Material(indexBufferID, 0, pch));
                     }
                     else
                     {
-                        matID = it->second;                        
+                        indexBufferID = it->second; 
                     }
                 }
             }
@@ -624,7 +843,7 @@ bool LoadOBJ(const std::string & fileName,
                     vertex.X() = ip[k];
                     vertex.Y() = in[k];
                     vertex.Z() = it[k];
-                    std::map< Vec3<Index>, Index, IVec3Cmp >::iterator it = vertices.find(vertex);
+                    std::map< Vec3<unsigned long>, unsigned long, IVec3Cmp >::iterator it = vertices.find(vertex);
                     if ( it == vertices.end() )
                     {
                         vertices[vertex] = nv;
@@ -639,8 +858,8 @@ bool LoadOBJ(const std::string & fileName,
                 triangles.push_back(triangle);
                 if (materials.size() > 0)
                 {
-                    ++materials[matID].m_numTriangles;
-                    matIDs.push_back(matID);
+                    ++materials[indexBufferID].m_numTriangles;
+                    indexBufferIDs.push_back(indexBufferID);
                 }
             }
         }
@@ -656,7 +875,7 @@ bool LoadOBJ(const std::string & fileName,
         {
             utexCoords.resize(nv);
         }
-        for (std::map< Vec3<Index>, Index, IVec3Cmp >::iterator it = vertices.begin(); it != vertices.end(); ++it)
+        for (std::map< Vec3<unsigned long>, unsigned long, IVec3Cmp >::iterator it = vertices.begin(); it != vertices.end(); ++it)
         {
             if (points.size() > 0)
             {
@@ -684,9 +903,9 @@ bool SaveOBJ(const std::string & fileName,
              const std::vector< Vec3<Real> > & points,
              const std::vector< Vec2<Real> > & texCoords,
              const std::vector< Vec3<Real> > & normals,
-             const std::vector< Vec3<Index> > & triangles,
+             const std::vector< Vec3<unsigned long> > & triangles,
              const std::vector< Material > & materials,
-             const std::vector< unsigned long > matIDs,
+             const std::vector< unsigned long > indexBufferIDs,
              const std::string & materialLib)
 {
     std::ofstream fout;
@@ -697,8 +916,8 @@ bool SaveOBJ(const std::string & fileName,
         const unsigned long nn = (unsigned long) normals.size();
         const unsigned long nt = (unsigned long) texCoords.size();
         const unsigned long nf = (unsigned long) triangles.size();
-        const bool useMaterial = (materials.size() > 0 && matIDs.size());
-        unsigned long matID;
+        const bool useMaterial = (materials.size() > 0 && indexBufferIDs.size());
+        unsigned long indexBufferID;
 
         fout << "####" << std::endl;
         fout << "#" << std::endl;
@@ -731,17 +950,17 @@ bool SaveOBJ(const std::string & fileName,
         }
         if (useMaterial)
         {
-            matID = matIDs[0];
-            fout <<"usemtl " << materials[matID].m_name << std::endl;                 
+            indexBufferID = indexBufferIDs[0];
+            fout <<"usemtl " << materials[indexBufferID].m_name << std::endl;
         }
         if (nt > 0 && nn >0)
         {
             for(unsigned long i = 0; i < nf; ++i)
             {
-                if (useMaterial && matID != matIDs[i])
+                if (useMaterial && indexBufferID != indexBufferIDs[i])
                 {
-                    matID = matIDs[i];
-                    fout <<"usemtl " << materials[matID].m_name << std::endl;                 
+                    indexBufferID = indexBufferIDs[i];
+                    fout <<"usemtl " << materials[indexBufferID].m_name << std::endl;
                 }
                 fout << "f " << triangles[i].X()+1 << "/" << triangles[i].X()+1 << "/" << triangles[i].X()+1;
                 fout << " "  << triangles[i].Y()+1 << "/" << triangles[i].Y()+1 << "/" << triangles[i].Y()+1;
@@ -752,10 +971,10 @@ bool SaveOBJ(const std::string & fileName,
         {
             for(unsigned long i = 0; i < nf; ++i)
             {
-                if (useMaterial && matID != matIDs[i])
+                if (useMaterial && indexBufferID != indexBufferIDs[i])
                 {
-                    matID = matIDs[i];
-                    fout <<"usemtl " << materials[matID].m_name << std::endl;                 
+                    indexBufferID = indexBufferIDs[i];
+                    fout <<"usemtl " << materials[indexBufferID].m_name << std::endl;
                 }
                 fout << "f " << triangles[i].X()+1 << "//" << triangles[i].X()+1;
                 fout << " "  << triangles[i].Y()+1 << "//" << triangles[i].Y()+1;
@@ -766,10 +985,10 @@ bool SaveOBJ(const std::string & fileName,
         {
             for(unsigned long i = 0; i < nf; ++i)
             {
-                if (useMaterial && matID != matIDs[i])
+                if (useMaterial && indexBufferID != indexBufferIDs[i])
                 {
-                    matID = matIDs[i];
-                    fout <<"usemtl " << materials[matID].m_name << std::endl;                 
+                    indexBufferID = indexBufferIDs[i];
+                    fout <<"usemtl " << materials[indexBufferID].m_name << std::endl;
                 }
                 fout << "f " << triangles[i].X()+1 << "/" << triangles[i].X()+1;
                 fout << " "  << triangles[i].Y()+1 << "/" << triangles[i].Y()+1;
@@ -780,10 +999,10 @@ bool SaveOBJ(const std::string & fileName,
         {
             for(unsigned long i = 0; i < nf; ++i)
             {
-                if (useMaterial && matID != matIDs[i])
+                if (useMaterial && indexBufferID != indexBufferIDs[i])
                 {
-                    matID = matIDs[i];
-                    fout <<"usemtl " << materials[matID].m_name << std::endl;                 
+                    indexBufferID = indexBufferIDs[i];
+                    fout <<"usemtl " << materials[indexBufferID].m_name << std::endl;
                 }
                 fout << "f " << triangles[i].X()+1;
                 fout << " "  << triangles[i].Y()+1;
@@ -861,4 +1080,164 @@ bool LoadMaterials(const std::string & fileName, std::vector< Material > & mater
     }
     return false;
 }
-
+template <class T>
+void SaveIFSArray(std::ofstream & fout, 
+                  const std::string & name, 
+                  unsigned int a, 
+                  const T * const tab, 
+                  unsigned long nElement, 
+                  unsigned long dim,
+                  int type)
+{
+    if (tab)
+    {
+        fout << name << "\t" << a << "\t" << type << "\t" << nElement << "\t" << dim << std::endl;
+    }
+    else
+    {
+        fout << name << "\t" << a << "\t" << type << "\t" << 0 << "\t" << 0 << std::endl;
+        return;
+    }
+    if (!tab) return;
+    for (unsigned long i = 0; i < nElement; ++i){
+        fout << "[" << i << "]\t";
+        for (unsigned long j = 0; j < dim; ++j){
+            fout << tab[i*dim + j] << "\t";
+        }
+        fout << std::endl;
+    }
+}
+bool SaveIFS(const std::string & fileName, const IndexedFaceSet<unsigned long> & ifs)
+{
+    std::ofstream fout;
+    fout.open(fileName.c_str());
+    if (!fout.fail()) 
+    {
+        SaveIFSArray(fout, "* CoordIndex", 0, ifs.GetCoordIndex(), ifs.GetNCoordIndex(), 3, (int) O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX);
+        SaveIFSArray(fout, "* IndexBufferID", 0, (const long * const) ifs.GetIndexBufferID(), ifs.GetNCoordIndex(), 1, (int) O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID);
+        SaveIFSArray(fout, "* Coord", 0, ifs.GetCoord(), ifs.GetNCoord(), 3, (int) O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_POSITION);
+        SaveIFSArray(fout, "* Normal", 0, ifs.GetNormal(), ifs.GetNNormal(), 3, (int) O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_NORMAL);
+        for(unsigned long a = 0; a < ifs.GetNumFloatAttributes(); ++a)
+        {
+            SaveIFSArray(fout, "* FloatAttribute", a, ifs.GetFloatAttribute(a), ifs.GetNFloatAttribute(a), ifs.GetFloatAttributeDim(a), ifs.GetFloatAttributeType(a));
+        }
+        for(unsigned long a = 0; a < ifs.GetNumIntAttributes(); ++a)
+        {
+            SaveIFSArray(fout, "* IntAttribute", a, ifs.GetIntAttribute(a), ifs.GetNIntAttribute(a), ifs.GetIntAttributeDim(a), ifs.GetIntAttributeType(a));
+        }
+        fout.close();
+    }
+    else 
+    {
+        std::cout << "Not able to create file" << std::endl;
+        return false;
+    }
+    return true;
+}
+bool LoadIFS(const std::string & fileName, 
+             std::vector< Vec3<Real> > & points,
+             std::vector< Vec2<Real> > & texCoords,
+             std::vector< Vec3<Real> > & normals,
+             std::vector< Vec3<unsigned long> > & triangles,
+             std::vector< unsigned long > & indexBufferIDs)
+{
+    std::ifstream fin;
+    fin.open(fileName.c_str());
+    if (!fin.fail()) 
+    {
+        unsigned long a, n, dim;
+        int type;
+        std::string tmp;
+        while(!fin.eof())
+        {
+            fin >> tmp;
+            if (tmp == "IndexBufferID")
+            {
+                fin >> a >> type >> n >> dim;
+                indexBufferIDs.resize(n);
+                for(unsigned long i = 0, p = 0; i < n; ++i)
+                {
+                    fin >> tmp;
+                    fin >> indexBufferIDs[i];
+                }
+            }
+            else if (tmp == "CoordIndex")
+            {
+                fin >> a >> type >> n >> dim;
+                triangles.resize(n);
+                for(unsigned long i = 0, p = 0; i < n; ++i)
+                {
+                    fin >> tmp;
+                    for(unsigned long d = 0; d < dim; ++d)
+                    {
+                        fin >> triangles[i][d];
+                    }
+                }
+            }
+            else if (tmp == "Coord")
+            {
+                fin >> a >> type >> n >> dim;
+                points.resize(n);
+                for(unsigned long i = 0, p = 0; i < n; ++i)
+                {
+                    fin >> tmp;
+                    for(unsigned long d = 0; d < dim; ++d)
+                    {
+                        fin >> points[i][d];
+                    }
+                }
+            }
+            else if (tmp == "Normal")
+            {
+                fin >> a >> type >> n >> dim;
+                normals.resize(n);
+                for(unsigned long i = 0, p = 0; i < n; ++i)
+                {
+                    fin >> tmp;
+                    for(unsigned long d = 0; d < dim; ++d)
+                    {
+                        fin >> normals[i][d];
+                    }
+                }
+            }
+            else if (tmp == "FloatAttribute")
+            {
+                fin >> a >> type >> n >> dim;
+                if (type == O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD)
+                {
+                    texCoords.resize(n);
+                    for(unsigned long i = 0, p = 0; i < n; ++i)
+                    {
+                        fin >> tmp;
+                        for(unsigned long d = 0; d < dim; ++d)
+                        {
+                            fin >> texCoords[i][d];
+                        }
+                    }
+                }
+            }
+        }
+        fin.close();
+        return true;
+    }
+    else 
+    {
+        std::cout << "Not able to load file" << std::endl;
+        return false;
+    }
+}
+bool Check(const IndexedFaceSet<unsigned long> & ifs)
+{
+    unsigned int nt = ifs.GetNCoordIndex() * 3;
+    unsigned int nv = ifs.GetNCoord();
+    const unsigned long * const triangles = ifs.GetCoordIndex();
+    for(unsigned int i = 0; i < nt; ++i)
+    {
+        if ( triangles[i] < 0 || triangles[i] >= nv )
+        {
+            std::cout << "CoordIndex[" << i << "] = " << triangles[i] << " out of range" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}

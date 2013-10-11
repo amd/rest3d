@@ -44,12 +44,12 @@ namespace o3dgc
                                     ~TriangleListEncoder(void);
         //! 
         O3DGCErrorCode              Encode(const T * const triangles,
-                                           const unsigned long * const matIDs,
+                                           const unsigned long * const indexBufferIDs,
                                            const long numTriangles,
                                            const long numVertices,
                                            BinaryStream & bstream);
-        O3DGCSC3DMCStreamType       GetStreamType() const { return m_streamType; }
-        void                        SetStreamType(O3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
+        O3DGCStreamType       GetStreamType() const { return m_streamType; }
+        void                        SetStreamType(O3DGCStreamType streamType) { m_streamType = streamType; }
         const long * const          GetInvVMap() const { return m_invVMap;}
         const long * const          GetInvTMap() const { return m_invTMap;}        
         const long * const          GetVMap()    const { return m_vmap;}
@@ -93,7 +93,7 @@ namespace o3dgc
         AdjacencyInfo               m_triangleToTriangleInv;
         TriangleFans                m_tfans;
         CompressedTriangleFans      m_ctfans;
-        O3DGCSC3DMCStreamType       m_streamType;
+        O3DGCStreamType       m_streamType;
     };
 }
 #include "o3dgcTriangleListEncoder.inl"    // template implementation

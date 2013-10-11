@@ -36,16 +36,12 @@ namespace o3dgc
                                     SC3DMCEncodeParams(void)
                                     {
                                         memset(this, 0, sizeof(SC3DMCEncodeParams));
-                                        m_encodeMode        = O3DGC_SC3DMC_TFAN;
-                                        m_streamTypeMode    = O3DGC_SC3DMC_STREAM_TYPE_ASCII;
+                                        m_encodeMode        = O3DGC_SC3DMC_ENCODE_MODE_TFAN;
+                                        m_streamTypeMode    = O3DGC_STREAM_TYPE_ASCII;
                                         m_coordQuantBits    = 14;
                                         m_normalQuantBits   = 8;
-                                        m_colorQuantBits    = 10;
-                                        m_texCoordQuantBits = 10;
                                         m_coordPredMode     = O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;
-                                        m_texCoordPredMode  = O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;
                                         m_normalPredMode    = O3DGC_SC3DMC_SURF_NORMALS_PREDICTION;
-                                        m_colorPredMode     = O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;
                                         for(unsigned long a = 0; a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES; ++a)
                                         {
                                             m_floatAttributePredMode[a] = O3DGC_SC3DMC_DIFFERENTIAL_PREDICTION;
@@ -58,26 +54,20 @@ namespace o3dgc
         //! Destructor.
                                     ~SC3DMCEncodeParams(void) {};
 
-        O3DGCSC3DMCStreamType       GetStreamType()    const { return m_streamTypeMode;}
+        O3DGCStreamType             GetStreamType()    const { return m_streamTypeMode;}
         O3DGCSC3DMCEncodingMode     GetEncodeMode()    const { return m_encodeMode;}
 
-        unsigned long               GetNFloatAttributes()  const { return m_numFloatAttributes;}
-        unsigned long               GetNIntAttributes()    const { return m_numIntAttributes;}
-
-        unsigned long               GetCoordQuantBits()    const { return m_coordQuantBits;}
-        unsigned long               GetNormalQuantBits()   const { return m_normalQuantBits;}
-        unsigned long               GetColorQuantBits()    const { return m_colorQuantBits;}
-        unsigned long               GetTexCoordQuantBits() const { return m_texCoordQuantBits;}
+        unsigned long               GetNumFloatAttributes() const { return m_numFloatAttributes;}
+        unsigned long               GetNumIntAttributes()   const { return m_numIntAttributes;}
+        unsigned long               GetCoordQuantBits()     const { return m_coordQuantBits;}
+        unsigned long               GetNormalQuantBits()    const { return m_normalQuantBits;}
         unsigned long               GetFloatAttributeQuantBits(unsigned long a) const
                                     {
                                        assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                        return m_floatAttributeQuantBits[a];
                                     }
-
         O3DGCSC3DMCPredictionMode   GetCoordPredMode()    const { return m_coordPredMode; }
         O3DGCSC3DMCPredictionMode   GetNormalPredMode()   const { return m_normalPredMode; }
-        O3DGCSC3DMCPredictionMode   GetColorPredMode()    const { return m_colorPredMode; }
-        O3DGCSC3DMCPredictionMode   GetTexCoordPredMode() const { return m_texCoordPredMode; }
         O3DGCSC3DMCPredictionMode   GetFloatAttributePredMode(unsigned long a) const
                                     {
                                        assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
@@ -90,35 +80,30 @@ namespace o3dgc
                                     }
         O3DGCSC3DMCPredictionMode & GetCoordPredMode()    { return m_coordPredMode; }
         O3DGCSC3DMCPredictionMode & GetNormalPredMode()   { return m_normalPredMode; }
-        O3DGCSC3DMCPredictionMode & GetColorPredMode()    { return m_colorPredMode; }
-        O3DGCSC3DMCPredictionMode & GetTexCoordPredMode() { return m_texCoordPredMode; }
         O3DGCSC3DMCPredictionMode & GetFloatAttributePredMode(unsigned long a)
                                     {
                                        assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                        return m_floatAttributePredMode[a];
                                     }
         O3DGCSC3DMCPredictionMode & GetIntAttributePredMode(unsigned long a)
-                                    { 
+                                    {
                                         assert(a < O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                         return m_intAttributePredMode[a];
                                     }
-
-        void                        SetStreamType(O3DGCSC3DMCStreamType streamTypeMode)  { m_streamTypeMode = streamTypeMode;}
+        void                        SetStreamType(O3DGCStreamType streamTypeMode)  { m_streamTypeMode = streamTypeMode;}
         void                        SetEncodeMode(O3DGCSC3DMCEncodingMode encodeMode)  { m_encodeMode = encodeMode;}
-        void                        SetNFloatAttributes(unsigned long numFloatAttributes) 
+        void                        SetNumFloatAttributes(unsigned long numFloatAttributes) 
                                     { 
                                         assert(numFloatAttributes < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                         m_numFloatAttributes = numFloatAttributes;
                                     }
-        void                        SetNIntAttributes  (unsigned long numIntAttributes)
+        void                        SetNumIntAttributes  (unsigned long numIntAttributes)
                                     { 
                                         assert(numIntAttributes < O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES);
                                         m_numIntAttributes   = numIntAttributes;
                                     }
         void                        SetCoordQuantBits   (unsigned int coordQuantBits   ) { m_coordQuantBits    = coordQuantBits   ; }
         void                        SetNormalQuantBits  (unsigned int normalQuantBits  ) { m_normalQuantBits   = normalQuantBits  ; }
-        void                        SetColorQuantBits   (unsigned int colorQuantBits   ) { m_colorQuantBits    = colorQuantBits   ; }
-        void                        SetTexCoordQuantBits(unsigned int texCoordQuantBits) { m_texCoordQuantBits = texCoordQuantBits; }
         void                        SetFloatAttributeQuantBits(unsigned long a, unsigned long q) 
                                     { 
                                        assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
@@ -126,10 +111,8 @@ namespace o3dgc
                                     }
         void                        SetCoordPredMode   (O3DGCSC3DMCPredictionMode coordPredMode   ) { m_coordPredMode    = coordPredMode   ; }
         void                        SetNormalPredMode  (O3DGCSC3DMCPredictionMode normalPredMode  ) { m_normalPredMode   = normalPredMode  ; }
-        void                        SetColorPredMode   (O3DGCSC3DMCPredictionMode colorPredMode   ) { m_colorPredMode    = colorPredMode   ; }
-        void                        SetTexCoordPredMode(O3DGCSC3DMCPredictionMode texCoordPredMode) { m_texCoordPredMode = texCoordPredMode; }
         void                        SetFloatAttributePredMode(unsigned long a, O3DGCSC3DMCPredictionMode p) 
-                                    { 
+                                    {
                                        assert(a < O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES);
                                        m_floatAttributePredMode[a] = p;
                                     }                       
@@ -143,17 +126,13 @@ namespace o3dgc
         unsigned long               m_numIntAttributes;
         unsigned long               m_coordQuantBits;
         unsigned long               m_normalQuantBits;
-        unsigned long               m_colorQuantBits;
-        unsigned long               m_texCoordQuantBits;
         unsigned long               m_floatAttributeQuantBits[O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES];
         
         O3DGCSC3DMCPredictionMode   m_coordPredMode;
-        O3DGCSC3DMCPredictionMode   m_texCoordPredMode; 
         O3DGCSC3DMCPredictionMode   m_normalPredMode; 
-        O3DGCSC3DMCPredictionMode   m_colorPredMode; 
         O3DGCSC3DMCPredictionMode   m_floatAttributePredMode[O3DGC_SC3DMC_MAX_NUM_FLOAT_ATTRIBUTES];
         O3DGCSC3DMCPredictionMode   m_intAttributePredMode  [O3DGC_SC3DMC_MAX_NUM_INT_ATTRIBUTES];
-        O3DGCSC3DMCStreamType       m_streamTypeMode;
+        O3DGCStreamType             m_streamTypeMode;
         O3DGCSC3DMCEncodingMode     m_encodeMode;
     };
 }

@@ -67,10 +67,10 @@ namespace o3dgc
                                         delete [] m_tempTriangles;
                                     };
 
-        O3DGCSC3DMCStreamType       GetStreamType()       const { return m_streamType; }
+        O3DGCStreamType       GetStreamType()       const { return m_streamType; }
         bool                        GetReorderTriangles() const { return m_decodeTrianglesOrder; }        
         bool                        GetReorderVertices()  const { return m_decodeVerticesOrder; }        
-        void                        SetStreamType(O3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
+        void                        SetStreamType(O3DGCStreamType streamType) { m_streamType = streamType; }
         const AdjacencyInfo &       GetVertexToTriangle() const { return m_vertexToTriangle;}
         O3DGCErrorCode              Decode(T * const triangles,
                                            const long numTriangles,
@@ -123,7 +123,7 @@ namespace o3dgc
         AdjacencyInfo               m_vertexToTriangle;
         CompressedTriangleFans      m_ctfans;
         TriangleFans                m_tfans;
-        O3DGCSC3DMCStreamType       m_streamType;
+        O3DGCStreamType       m_streamType;
         bool                        m_decodeTrianglesOrder;
         bool                        m_decodeVerticesOrder;
     };

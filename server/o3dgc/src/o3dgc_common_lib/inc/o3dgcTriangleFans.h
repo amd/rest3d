@@ -41,7 +41,7 @@ namespace o3dgc
         //! Constructor.
                                     CompressedTriangleFans(void)
                                     {
-                                        m_streamType   = O3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
+                                        m_streamType   = O3DGC_STREAM_TYPE_UNKOWN;
                                         m_bufferAC     = 0;
                                         m_sizeBufferAC = 0;
                                     };
@@ -50,8 +50,8 @@ namespace o3dgc
                                     {
                                         delete [] m_bufferAC;
                                     };
-        O3DGCSC3DMCStreamType       GetStreamType() const { return m_streamType; }
-        void                        SetStreamType(O3DGCSC3DMCStreamType streamType) { m_streamType = streamType; }
+        O3DGCStreamType       GetStreamType() const { return m_streamType; }
+        void                        SetStreamType(O3DGCStreamType streamType) { m_streamType = streamType; }
 
         O3DGCErrorCode              Allocate(long numVertices, long numTriangles)
                                     {
@@ -136,11 +136,11 @@ namespace o3dgc
                                     }
         O3DGCErrorCode              Save(BinaryStream & bstream,
                                          bool encodeTrianglesOrder,
-                                         O3DGCSC3DMCStreamType streamType);
+                                         O3DGCStreamType streamType);
         O3DGCErrorCode              Load(const BinaryStream & bstream, 
                                          unsigned long & iterator, 
                                          bool decodeTrianglesOrder,
-                                         O3DGCSC3DMCStreamType streamType);
+                                         O3DGCStreamType streamType);
 
     private:
         O3DGCErrorCode              SaveBinAC(const Vector<long> & data,
@@ -160,7 +160,7 @@ namespace o3dgc
         Vector<long>                m_trianglesOrder;
         unsigned char *             m_bufferAC;
         unsigned long               m_sizeBufferAC;
-        O3DGCSC3DMCStreamType       m_streamType;
+        O3DGCStreamType       m_streamType;
     };
 
     //! 

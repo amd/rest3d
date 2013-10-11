@@ -41,13 +41,14 @@ namespace o3dgc
         //! Constructor.
                                     SC3DMCEncoder(void)
                                     {
+                                        m_posSize             = 0;
                                         m_quantFloatArray     = 0;
                                         m_quantFloatArraySize = 0;
                                         m_sizeBufferAC        = 0;
                                         m_bufferAC            = 0;
                                         m_normals             = 0;
                                         m_normalsSize         = 0;
-                                        m_streamType          = O3DGC_SC3DMC_STREAM_TYPE_UNKOWN;
+                                        m_streamType          = O3DGC_STREAM_TYPE_UNKOWN;
                                     };
         //! Destructor.
                                     ~SC3DMCEncoder(void)
@@ -90,11 +91,13 @@ namespace o3dgc
                                                    unsigned long numIntArray,
                                                    unsigned long dimIntArray,
                                                    unsigned long stride,
+                                                   const IndexedFaceSet<T> & ifs,
                                                    O3DGCSC3DMCPredictionMode predMode,
                                                    BinaryStream & bstream);
         O3DGCErrorCode              ProcessNormals(const IndexedFaceSet<T> & ifs);
         TriangleListEncoder<T>      m_triangleListEncoder;
         long *                      m_quantFloatArray;
+        unsigned long               m_posSize;
         unsigned long               m_quantFloatArraySize;
         unsigned char *             m_bufferAC;
         unsigned long               m_sizeBufferAC;
@@ -105,7 +108,7 @@ namespace o3dgc
         Real *                      m_normals;
         unsigned long               m_normalsSize;
         SC3DMCStats                 m_stats;
-        O3DGCSC3DMCStreamType       m_streamType;
+        O3DGCStreamType       m_streamType;
     };
 }
 #include "o3dgcSC3DMCEncoder.inl"    // template implementation
