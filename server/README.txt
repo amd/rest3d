@@ -48,7 +48,7 @@ EXIST_URI=xmldb:exist://localhost:8081/exist/xmlrpc
 http://dita-ot.sourceforge.net/doc/ot-userguide13/xhtml/installing/windows_installingant.html
 
  go to rest3d/database/eXist/ant
- > ant -f install-models.xml 
+ > ant -f install-server.xml 
 this installs a few collections with proper permissions
 
  > ant -f install-models.xml
