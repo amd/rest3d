@@ -63,6 +63,7 @@
     user="${rest3d.user}"
     password="${rest3d.password}"
     createcollection="false"
+    mimetypesfile="${exist.dir}/mime-types.xml"
     createsubcollections="true">
     <fileset dir="${public.path}">
       <exclude name="**/.*"/>
