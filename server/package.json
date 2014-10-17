@@ -27,7 +27,10 @@
     "cookies":"",
     "passport":"",
     "passport-google":"",
-    "existdb-node": "git+https://github.com/amd/existdb-node.git"
+    "existdb-node": "git+https://github.com/amd/existdb-node.git",
+    "verror":"",
+    "bunyan":"",
+    "http-signature":""
   },
   "devDependencies": {
     "mocha": "1.7.4",
