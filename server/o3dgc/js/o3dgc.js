@@ -1,4 +1,4 @@
-/*global ArrayBuffer, Uint32Array, Int32Array, Float32Array, Int8Array, Uint8Array, window, performance, Console*/
+/*global ArrayBuffer, Uint32Array, Int32Array, Float32Array, Int8Array, Uint8Array, performance, Console*/
 
 /*
 Copyright (c) 2013 Khaled Mammou - Advanced Micro Devices, Inc.
@@ -179,7 +179,7 @@ var o3dgc = (function () {
         return pos;
     }
     // Timer class
-    var windowPerformance = typeof window !== 'undefined' && typeof window.performance !== 'undefined' ? window.performance : {};
+    var windowPerformance = (typeof performance !== 'undefined') ? performance : {};
     if (!windowPerformance.now) {
         local.nowOffset = Date.now();
         if (performance.timing && performance.timing.navigationStart) {
