@@ -182,8 +182,8 @@ var o3dgc = (function () {
     var windowPerformance = (typeof performance !== 'undefined') ? performance : {};
     if (!windowPerformance.now) {
         local.nowOffset = Date.now();
-        if (performance.timing && performance.timing.navigationStart) {
-            local.nowOffset = performance.timing.navigationStart;
+        if (windowPerformance.timing && windowPerformance.timing.navigationStart) {
+            local.nowOffset = windowPerformance.timing.navigationStart;
         }
         windowPerformance.now = function now() {
             return Date.now() - local.nowOffset;
