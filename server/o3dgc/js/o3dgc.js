@@ -1,4 +1,4 @@
-/*global ArrayBuffer, Uint32Array, Int32Array, Float32Array, Int8Array, Uint8Array, window, performance, Console*/
+/*global ArrayBuffer, Uint32Array, Int32Array, Float32Array, Int8Array, Uint8Array, performance, Console*/
 
 /*
 Copyright (c) 2013 Khaled Mammou - Advanced Micro Devices, Inc.
@@ -178,28 +178,30 @@ var o3dgc = (function () {
         }
         return pos;
     }
-    // Timer class
-    if (typeof window.performance === 'undefined') {
-        window.performance = {};
-    }
-    if (!window.performance.now) {
-        local.nowOffset = Date.now();
-        if (performance.timing && performance.timing.navigationStart) {
-            local.nowOffset = performance.timing.navigationStart;
+
+    var getTimestamp = (function() {
+        if (typeof performance != 'undefined' && typeof performance.now !== 'undefined') {
+            return function() {
+                return performance.now();
+            };
+        } else {
+            var nowOffset = Date.now();
+            return function() {
+                return Date.now() - nowOffset;
+            };
         }
-        window.performance.now = function now() {
-            return Date.now() - local.nowOffset;
-        };
-    }
+    })();
+
+    // Timer class
     module.Timer = function () {
         this.m_start = 0;
         this.m_end = 0;
     };
     module.Timer.prototype.Tic = function () {
-        this.m_start = window.performance.now();
+        this.m_start = getTimestamp();
     };
     module.Timer.prototype.Toc = function () {
-        this.m_end = window.performance.now();
+        this.m_end = getTimestamp();
     };
     module.Timer.prototype.GetElapsedTime = function () {
         return this.m_end - this.m_start;
