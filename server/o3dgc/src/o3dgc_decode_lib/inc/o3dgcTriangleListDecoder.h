@@ -65,6 +65,8 @@ namespace o3dgc
                                     ~TriangleListDecoder(void)
                                     {
                                         delete [] m_tempTriangles;
+                                        delete [] m_visitedVerticesValence;
+                                        delete [] m_visitedVertices;
                                     };
 
         O3DGCStreamType       GetStreamType()       const { return m_streamType; }
