@@ -63,8 +63,8 @@ namespace o3dgc
                                         if (m_size > 0)
                                         {
                                             memcpy(tmp, m_buffer, m_size * sizeof(T) );
-                                            delete [] m_buffer;
                                         }
+                                        delete[] m_buffer;
                                         m_buffer = tmp;
                                     }
                                 };
