@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include "o3dgcCommon.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #elif __MACH__
 #include <mach/clock.h>
@@ -40,7 +40,7 @@ THE SOFTWARE.
 
 namespace o3dgc
 {
-#ifdef WIN32
+#ifdef _WIN32
     class Timer
     {
     public: 
