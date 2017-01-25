@@ -55,7 +55,7 @@ using namespace o3dgc;
 class IVec3Cmp 
 {
    public:
-      bool operator()(const Vec3<unsigned long> a,const Vec3<unsigned long> b) 
+      bool operator()(const Vec3<unsigned long> a,const Vec3<unsigned long> b) const
       { 
           if (a.X() != b.X())
           {
@@ -1233,7 +1233,7 @@ bool Check(const IndexedFaceSet<unsigned long> & ifs)
     const unsigned long * const triangles = ifs.GetCoordIndex();
     for(unsigned int i = 0; i < nt; ++i)
     {
-        if ( triangles[i] < 0 || triangles[i] >= nv )
+        if ( triangles[i] >= nv )
         {
             std::cout << "CoordIndex[" << i << "] = " << triangles[i] << " out of range" << std::endl;
             return false;
